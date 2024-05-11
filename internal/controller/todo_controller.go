@@ -90,6 +90,9 @@ func (t *TodoController) FindByID(c *fiber.Ctx) error {
 	if err != nil {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
+	if res.Todo.UserID != id.(int) {
+		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+	}
 
 	return c.Status(fiber.StatusOK).JSON(res)
 }
@@ -105,8 +108,7 @@ func (t *TodoController) Update(c *fiber.Ctx) error {
 	if id == nil {
 		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
 	}
-
-	req.UserID = id.(int)
+	userID := id.(int)
 
 	idP, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -118,6 +120,15 @@ func (t *TodoController) Update(c *fiber.Ctx) error {
 	res, err := t.tu.Update(ctx, req)
 	if err != nil {
 		return handleError(c, err, fiber.StatusInternalServerError)
+	}
+
+	todo, err := t.tu.FindByID(ctx, req.ID)
+	if err != nil {
+		return handleError(c, err, fiber.StatusInternalServerError)
+	}
+
+	if todo.Todo.UserID != userID {
+		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(res)

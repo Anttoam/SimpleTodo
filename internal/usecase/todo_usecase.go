@@ -76,7 +76,6 @@ func (tu *TodoUsecase) Update(ctx context.Context, req dto.UpdateTodoRequest) (*
 	updateTodo := &domain.Todo{
 		Title:     req.Title,
 		Body:      req.Body,
-		UserID:    req.UserID,
 		UpdatedAt: time.Now(),
 	}
 
