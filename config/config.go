@@ -8,11 +8,17 @@ import (
 
 type Config struct {
 	Turso TursoConfig
+	Redis RedisConfig
 }
 
 type TursoConfig struct {
 	Name  string
 	Token string
+}
+
+type RedisConfig struct {
+	Host string
+	Port int
 }
 
 func LoadConfig(filename string) (*viper.Viper, error) {
