@@ -5,50 +5,57 @@ import (
 
 	"github.com/Anttoam/golang-htmx-todos/dto"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
 type UserUsecase interface {
-	SignUp(ctx context.Context, user dto.SignUpRequest) error
-	Login(ctx context.Context, user dto.LoginRequest) error
+	SignUp(ctx context.Context, user dto.SignUpRequest) (*dto.SignUpResponse, error)
+	Login(ctx context.Context, user dto.LoginRequest) (*dto.LoginResponse, error)
 }
 
 type UserController struct {
-	uu UserUsecase
+	uu    UserUsecase
+	store *session.Store
 }
 
-func NewUserController(app *fiber.App, uu UserUsecase) {
-	user := &UserController{uu: uu}
+func NewUserController(app *fiber.App, uu UserUsecase, store *session.Store) {
+	user := &UserController{uu: uu, store: store}
 
 	app.Post("/signup", user.SignUp)
 	app.Post("/login", user.Login)
 }
 
-func (u *UserController) SignUp(c *fiber.Ctx) error {
-	var user dto.SignUpRequest
-	if err := parseAndHandleError(c, &user); err != nil {
+func (uc *UserController) SignUp(c *fiber.Ctx) error {
+	var req dto.SignUpRequest
+	if err := parseAndHandleError(c, &req); err != nil {
 		return err
 	}
 
 	ctx := c.Context()
-	if err := u.uu.SignUp(ctx, user); err != nil {
+	res, err := uc.uu.SignUp(ctx, req)
+	if err != nil {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "User created successfully",
-	})
+	return c.Status(fiber.StatusCreated).JSON(res)
 }
 
-func (u *UserController) Login(c *fiber.Ctx) error {
-	var user dto.LoginRequest
-	if err := parseAndHandleError(c, &user); err != nil {
+func (uc *UserController) Login(c *fiber.Ctx) error {
+	var req dto.LoginRequest
+	if err := parseAndHandleError(c, &req); err != nil {
 		return err
 	}
 
 	ctx := c.Context()
-	if err := u.uu.Login(ctx, user); err != nil {
+	res, err := uc.uu.Login(ctx, req)
+	if err != nil {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "User logged in successfully",
-	})
+
+	sess, _ := uc.store.Get(c)
+	sess.Set("id", res.ID)
+	if err := sess.Save(); err != nil {
+		return handleError(c, err, fiber.StatusInternalServerError)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(res)
 }
