@@ -1,0 +1,65 @@
+linters-settings:
+  govet:
+    settings:
+      printf:
+        funcs:
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
+          - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - opinionated
+      - style
+    disabled-checks:
+      - paramTypeCombine
+      - unnamedResult
+      - whyNoLint
+
+  revive:
+    rules:
+      - name: package-comments
+        disabled: true
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  lll:
+    line-length: 120
+  gocyclo:
+    min-complexity: 16
+  funlen:
+    lines: 150
+    statements: 80
+  misspell:
+    locale: "US"
+  dupl:
+    threshold: 100
+
+issues:
+  exclude-use-default: false
+
+linters:
+  disable-all: true
+  enable:
+    - errcheck
+    - errorlint
+    - gocritic
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - revive
+    - goimports
+    - funlen
+    - goconst
+    - gocyclo
+    - gosec
+    - lll
+    - misspell
+    - unconvert
+    - unparam
+    - dupl
+    - gofumpt
+    - nolintlint
