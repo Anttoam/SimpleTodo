@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/Anttoam/golang-htmx-todos/domain"
@@ -63,7 +62,6 @@ func (u *UserUsecase) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 		ID:    user.ID,
 		Email: user.Email,
 	}
-	log.Println(res)
 
 	return res, nil
 }
