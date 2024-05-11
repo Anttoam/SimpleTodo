@@ -47,7 +47,7 @@ func main() {
 	redis := storage.NewRedisClient(cfg)
 	store := session.New(session.Config{
 		Storage:      redis,
-		Expiration:   3 * time.Minute,
+		Expiration:   10 * time.Minute,
 		KeyLookup:    "cookie:session_id",
 		CookiePath:   "/",
 		CookieDomain: "localhost",
