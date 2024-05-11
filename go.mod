@@ -4,6 +4,7 @@ go 1.22.2
 
 require (
 	github.com/gofiber/fiber/v2 v2.52.4
+	github.com/gofiber/storage/redis/v3 v3.1.1
 	github.com/spf13/viper v1.18.2
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240416075003-747366ff79c4
 	golang.org/x/crypto v0.16.0
@@ -12,6 +13,8 @@ require (
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -23,6 +26,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
+	github.com/redis/go-redis/v9 v9.5.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
