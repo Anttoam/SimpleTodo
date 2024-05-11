@@ -54,3 +54,9 @@ func (r *TodoRepository) FindByID(ctx context.Context, todoID int) (*domain.Todo
 	}
 	return &todo, nil
 }
+
+func (r *TodoRepository) Update(ctx context.Context, todo *domain.Todo, todoID int) error {
+	query := "UPDATE todos SET title = ?, body = ?, updated_at = ? WHERE id = ?"
+	_, err := r.db.ExecContext(ctx, query, todo.Title, todo.Body, todo.UpdatedAt, todoID)
+	return err
+}

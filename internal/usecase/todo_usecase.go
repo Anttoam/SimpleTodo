@@ -12,6 +12,7 @@ type TodoRepository interface {
 	Create(ctx context.Context, todo *domain.Todo, userID int) error
 	FindAll(ctx context.Context, userID int) ([]*domain.Todo, error)
 	FindByID(ctx context.Context, id int) (*domain.Todo, error)
+	Update(ctx context.Context, todo *domain.Todo, todoID int) error
 }
 
 type TodoUsecase struct {
@@ -66,6 +67,29 @@ func (tu *TodoUsecase) FindByID(ctx context.Context, todoID int) (*dto.FindByIDT
 
 	res := &dto.FindByIDTodoResponse{
 		Todo: todo,
+	}
+
+	return res, nil
+}
+
+func (tu *TodoUsecase) Update(ctx context.Context, req dto.UpdateTodoRequest) (*dto.UpdateTodoResponse, error) {
+	updateTodo := &domain.Todo{
+		Title:     req.Title,
+		Body:      req.Body,
+		UserID:    req.UserID,
+		UpdatedAt: time.Now(),
+	}
+
+	if err := tu.tr.Update(ctx, updateTodo, req.ID); err != nil {
+		return nil, err
+	}
+
+	res := &dto.UpdateTodoResponse{
+		ID:        req.ID,
+		Title:     updateTodo.Title,
+		Body:      updateTodo.Body,
+		UserID:    updateTodo.UserID,
+		UpdatedAt: updateTodo.UpdatedAt,
 	}
 
 	return res, nil
