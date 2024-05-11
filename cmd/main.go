@@ -2,14 +2,17 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/Anttoam/golang-htmx-todos/config"
 	"github.com/Anttoam/golang-htmx-todos/internal/controller"
 	"github.com/Anttoam/golang-htmx-todos/internal/repository"
 	"github.com/Anttoam/golang-htmx-todos/internal/usecase"
+	"github.com/Anttoam/golang-htmx-todos/pkg/storage"
 	"github.com/Anttoam/golang-htmx-todos/pkg/turso"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
 type Film struct {
@@ -37,8 +40,25 @@ func main() {
 	userRepository := repository.NewUserRepository(db)
 	userUsecase := usecase.NewUserUsecase(userRepository)
 
+	todoRepository := repository.NewTodoRepository(db)
+	todoUsecase := usecase.NewTodoUsecase(todoRepository)
+
 	app := fiber.New()
-	controller.NewUserController(app, userUsecase)
+	redis := storage.NewRedisClient(cfg)
+	store := session.New(session.Config{
+		Storage:      redis,
+		Expiration:   3 * time.Minute,
+		KeyLookup:    "cookie:session_id",
+		CookiePath:   "/",
+		CookieDomain: "localhost",
+		// CookieSecure: true,
+		CookieHTTPOnly: true,
+		CookieSameSite: "Strict",
+	})
+
+	controller.NewUserController(app, userUsecase, store)
+
+	controller.NewTodoController(app, todoUsecase, store)
 
 	log.Fatal(app.Listen(":8080"))
 }
