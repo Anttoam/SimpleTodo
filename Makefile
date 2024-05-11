@@ -4,4 +4,7 @@ db-shall:
 lint:
 	golangci-lint run
 
-.PHONY: db-shall lint
+redis:
+	docker-compose exec redis redis-cli -h localhost -p 6379
+
+.PHONY: db-shall lint redis
