@@ -44,3 +44,13 @@ func (r *TodoRepository) FindAll(ctx context.Context, userID int) ([]*domain.Tod
 	}
 	return todos, nil
 }
+
+func (r *TodoRepository) FindByID(ctx context.Context, todoID int) (*domain.Todo, error) {
+	query := "SELECT id, title, body, user_id, created_at, updated_at FROM todos WHERE id = ?"
+	row := r.db.QueryRowContext(ctx, query, todoID)
+	var todo domain.Todo
+	if err := row.Scan(&todo.ID, &todo.Title, &todo.Body, &todo.UserID, &todo.CreatedAt, &todo.UpdatedAt); err != nil {
+		return nil, err
+	}
+	return &todo, nil
+}

@@ -11,6 +11,7 @@ import (
 type TodoRepository interface {
 	Create(ctx context.Context, todo *domain.Todo, userID int) error
 	FindAll(ctx context.Context, userID int) ([]*domain.Todo, error)
+	FindByID(ctx context.Context, id int) (*domain.Todo, error)
 }
 
 type TodoUsecase struct {
@@ -55,4 +56,17 @@ func (tu *TodoUsecase) FindAll(ctx context.Context, userID int) (*dto.FindAllTod
 	}
 
 	return &res, nil
+}
+
+func (tu *TodoUsecase) FindByID(ctx context.Context, todoID int) (*dto.FindByIDTodoResponse, error) {
+	todo, err := tu.tr.FindByID(ctx, todoID)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &dto.FindByIDTodoResponse{
+		Todo: todo,
+	}
+
+	return res, nil
 }
