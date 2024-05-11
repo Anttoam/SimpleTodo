@@ -23,3 +23,7 @@ type CreateTodoResponse struct {
 type FindAllTodoResponse struct {
 	Todos []*domain.Todo `json:"todos"`
 }
+
+type FindByIDTodoResponse struct {
+	Todo *domain.Todo `json:"todo"`
+}
