@@ -13,6 +13,7 @@ type TodoRepository interface {
 	FindAll(ctx context.Context, userID int) ([]*domain.Todo, error)
 	FindByID(ctx context.Context, id int) (*domain.Todo, error)
 	Update(ctx context.Context, todo *domain.Todo, todoID int) error
+	Delete(ctx context.Context, todoID int) error
 }
 
 type TodoUsecase struct {
@@ -92,4 +93,11 @@ func (tu *TodoUsecase) Update(ctx context.Context, req dto.UpdateTodoRequest) (*
 	}
 
 	return res, nil
+}
+
+func (tu *TodoUsecase) Delete(ctx context.Context, todoID int) error {
+	if err := tu.tr.Delete(ctx, todoID); err != nil {
+		return err
+	}
+	return nil
 }

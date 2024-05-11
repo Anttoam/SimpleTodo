@@ -15,6 +15,7 @@ type TodoUsecase interface {
 	FindAll(ctx context.Context, userID int) (*dto.FindAllTodoResponse, error)
 	FindByID(ctx context.Context, todoID int) (*dto.FindByIDTodoResponse, error)
 	Update(ctx context.Context, req dto.UpdateTodoRequest) (*dto.UpdateTodoResponse, error)
+	Delete(ctx context.Context, todoID int) error
 }
 
 type TodoController struct {
@@ -29,6 +30,7 @@ func NewTodoController(app *fiber.App, tu TodoUsecase, store *session.Store) {
 	app.Get("/all", todo.FindAll)
 	app.Get("/:id", todo.FindByID)
 	app.Put("/:id", todo.Update)
+	app.Delete("/:id", todo.Delete)
 }
 
 func (t *TodoController) Create(c *fiber.Ctx) error {
@@ -132,4 +134,33 @@ func (t *TodoController) Update(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(res)
+}
+
+func (t *TodoController) Delete(c *fiber.Ctx) error {
+	sess, _ := t.store.Get(c)
+	id := sess.Get("id")
+	if id == nil {
+		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+	}
+
+	idP, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return handleError(c, err, fiber.StatusNotFound)
+	}
+
+	ctx := c.Context()
+	todo, err := t.tu.FindByID(ctx, idP)
+	if err != nil {
+		return handleError(c, err, fiber.StatusInternalServerError)
+	}
+
+	if todo.Todo.UserID != id.(int) {
+		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+	}
+
+	if err := t.tu.Delete(ctx, todo.Todo.ID); err != nil {
+		return handleError(c, err, fiber.StatusInternalServerError)
+	}
+
+	return c.Status(fiber.StatusNoContent).JSON(nil)
 }
