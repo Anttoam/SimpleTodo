@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/Anttoam/golang-htmx-todos/domain"
 	"github.com/Anttoam/golang-htmx-todos/dto"
@@ -23,10 +22,10 @@ func NewUserUsecase(ur UserRepository) *UserUsecase {
 	return &UserUsecase{ur: ur}
 }
 
-func (u *UserUsecase) SignUp(ctx context.Context, req dto.SignUpRequest) (*dto.SignUpResponse, error) {
+func (u *UserUsecase) SignUp(ctx context.Context, req dto.SignUpRequest) error {
 	hashedPassword, err := utils.HashPassword(req.Password)
 	if err != nil {
-		return nil, fmt.Errorf("failed to hash password: %w", err)
+		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	user := &domain.User{
@@ -36,16 +35,10 @@ func (u *UserUsecase) SignUp(ctx context.Context, req dto.SignUpRequest) (*dto.S
 	}
 
 	if err := u.ur.Create(ctx, user); err != nil {
-		return nil, err
+		return err
 	}
 
-	res := &dto.SignUpResponse{
-		Name:      user.Name,
-		Email:     user.Email,
-		CreatedAt: time.Now(),
-	}
-
-	return res, nil
+	return nil
 }
 
 func (u *UserUsecase) Login(ctx context.Context, req dto.LoginRequest) (*dto.LoginResponse, error) {
