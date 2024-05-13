@@ -12,6 +12,7 @@ import (
 	"github.com/Anttoam/golang-htmx-todos/pkg/turso"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
@@ -44,6 +45,7 @@ func main() {
 	todoUsecase := usecase.NewTodoUsecase(todoRepository)
 
 	app := fiber.New()
+	app.Use(logger.New())
 	redis := storage.NewRedisClient(cfg)
 	store := session.New(session.Config{
 		Storage:      redis,
