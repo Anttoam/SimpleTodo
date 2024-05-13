@@ -116,14 +116,10 @@ func (t *TodoController) Update(c *fiber.Ctx) error {
 	if err != nil {
 		return handleError(c, err, fiber.StatusNotFound)
 	}
+
 	req.ID = idP
 
 	ctx := c.Context()
-	res, err := t.tu.Update(ctx, req)
-	if err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
-	}
-
 	todo, err := t.tu.FindByID(ctx, req.ID)
 	if err != nil {
 		return handleError(c, err, fiber.StatusInternalServerError)
@@ -131,6 +127,10 @@ func (t *TodoController) Update(c *fiber.Ctx) error {
 
 	if todo.Todo.UserID != userID {
 		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+	}
+	res, err := t.tu.Update(ctx, req)
+	if err != nil {
+		return handleError(c, err, fiber.StatusInternalServerError)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(res)
