@@ -57,7 +57,7 @@ func main() {
 		CookieHTTPOnly: true,
 		CookieSameSite: "Strict",
 	})
-
+	app.Static("/dist", "./dist")
 	controller.NewUserController(app, userUsecase, store)
 
 	controller.NewTodoController(app, todoUsecase, store)
