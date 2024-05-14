@@ -68,5 +68,8 @@ func (uc *UserController) Login(c *fiber.Ctx) error {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(res)
+	login := auth.Login()
+	component := templ.Handler(login)
+	handler := adaptor.HTTPHandler(component)
+	return handler(c)
 }
