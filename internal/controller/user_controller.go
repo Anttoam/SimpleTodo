@@ -30,18 +30,20 @@ func NewUserController(app *fiber.App, uu UserUsecase, store *session.Store) {
 }
 
 func (uc *UserController) SignUp(c *fiber.Ctx) error {
-	req := dto.SignUpRequest{
-		Name:     c.FormValue("name"),
-		Email:    c.FormValue("email"),
-		Password: c.FormValue("password"),
-	}
-	if err := parseAndHandleError(c, &req); err != nil {
-		return err
-	}
-
-	ctx := c.Context()
-	if err := uc.uu.SignUp(ctx, req); err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+	if c.Method() == fiber.MethodPost {
+		req := dto.SignUpRequest{
+			Name:     c.FormValue("name"),
+			Email:    c.FormValue("email"),
+			Password: c.FormValue("password"),
+		}
+		if err := parseAndHandleError(c, &req); err != nil {
+			return err
+		}
+	
+		ctx := c.Context()
+		if err := uc.uu.SignUp(ctx, req); err != nil {
+			return handleError(c, err, fiber.StatusInternalServerError)
+		}	
 	}
 
 	signup := auth.SignUp()
@@ -51,21 +53,23 @@ func (uc *UserController) SignUp(c *fiber.Ctx) error {
 }
 
 func (uc *UserController) Login(c *fiber.Ctx) error {
-	var req dto.LoginRequest
-	if err := parseAndHandleError(c, &req); err != nil {
-		return err
-	}
+	if c.Method() == fiber.MethodPost {
+		var req dto.LoginRequest
+		if err := parseAndHandleError(c, &req); err != nil {
+			return err
+		}
 
-	ctx := c.Context()
-	res, err := uc.uu.Login(ctx, req)
-	if err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
-	}
+		ctx := c.Context()
+		res, err := uc.uu.Login(ctx, req)
+		if err != nil {
+			return handleError(c, err, fiber.StatusInternalServerError)
+		}
 
-	sess, _ := uc.store.Get(c)
-	sess.Set("id", res.ID)
-	if err := sess.Save(); err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+		sess, _ := uc.store.Get(c)
+		sess.Set("id", res.ID)
+		if err := sess.Save(); err != nil {
+			return handleError(c, err, fiber.StatusInternalServerError)
+		}
 	}
 
 	login := auth.Login()
