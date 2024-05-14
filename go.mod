@@ -8,7 +8,7 @@ require (
 	github.com/gofiber/storage/redis/v3 v3.1.1
 	github.com/spf13/viper v1.18.2
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240416075003-747366ff79c4
-	golang.org/x/crypto v0.16.0
+	golang.org/x/crypto v0.22.0
 )
 
 require (
