@@ -26,6 +26,7 @@ func NewUserController(app *fiber.App, uu UserUsecase, store *session.Store) {
 
 	app.Get("/signup", user.SignUp)
 	app.Post("/signup", user.SignUp)
+	app.Get("/login", user.Login)
 	app.Post("/login", user.Login)
 }
 
