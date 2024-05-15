@@ -27,7 +27,6 @@ func NewTodoUsecase(tr TodoRepository) *TodoUsecase {
 func (tu *TodoUsecase) Create(ctx context.Context, req dto.CreateTodoRequest) (*dto.CreateTodoResponse, error) {
 	newTodo := &domain.Todo{
 		Title:     req.Title,
-		Body:      req.Body,
 		UserID:    req.UserID,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -38,7 +37,6 @@ func (tu *TodoUsecase) Create(ctx context.Context, req dto.CreateTodoRequest) (*
 
 	res := &dto.CreateTodoResponse{
 		Title:     newTodo.Title,
-		Body:      newTodo.Body,
 		UserID:    newTodo.UserID,
 		CreatedAt: newTodo.CreatedAt,
 		UpdatedAt: newTodo.UpdatedAt,
@@ -76,7 +74,6 @@ func (tu *TodoUsecase) FindByID(ctx context.Context, todoID int) (*dto.FindByIDT
 func (tu *TodoUsecase) Update(ctx context.Context, req dto.UpdateTodoRequest) (*dto.UpdateTodoResponse, error) {
 	updateTodo := &domain.Todo{
 		Title:     req.Title,
-		Body:      req.Body,
 		UpdatedAt: time.Now(),
 	}
 
@@ -87,7 +84,6 @@ func (tu *TodoUsecase) Update(ctx context.Context, req dto.UpdateTodoRequest) (*
 	res := &dto.UpdateTodoResponse{
 		ID:        req.ID,
 		Title:     updateTodo.Title,
-		Body:      updateTodo.Body,
 		UserID:    updateTodo.UserID,
 		UpdatedAt: updateTodo.UpdatedAt,
 	}
