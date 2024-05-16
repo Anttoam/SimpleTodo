@@ -14,7 +14,7 @@ templ SignUp() {
 					</h2>
 				</div>
 				<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-					<form class="space-y-6" hx-post="/signup" hx-trigger="submit" hx-swap="outerHTML" hx-target="body">
+					<form class="space-y-6" action="/signup" method="post">
 						<div>
 							<label for="email" class="block text-sm font-medium leading-6 text-gray-600">
 								ユーザー名
@@ -75,7 +75,7 @@ templ SignUp() {
 					</form>
 					<p class="mt-10 text-center text-sm text-gray-500">
 						すでにアカウントをお持ちですか？
-						<a hx-get="/login" hx-swap="outerHTML" hx-target="body" class="font-bold leading-6 text-gray-600 hover:text-gray-300">
+						<a href="/login" class="font-bold leading-6 text-gray-600 hover:text-gray-300">
 							ログイン
 						</a>
 					</p>
