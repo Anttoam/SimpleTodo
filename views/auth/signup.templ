@@ -4,17 +4,17 @@ import "github.com/Anttoam/golang-htmx-todos/views/base"
 
 templ SignUp() {
 	<!DOCTYPE html>
-	<html lang="ja" class="h-full bg-white">
+	<html lang="ja" class="h-full">
 		@base.Header()
-		<body class="h-full">
-			<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+		<body class="bg-gray-200">
+			<div id="page" class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
 				<div class="sm:mx-auto sm:w-full sm:max-w-sm">
 					<h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
 						サインアップ
 					</h2>
 				</div>
 				<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-					<form class="space-y-6" action="/signup" method="post">
+					<form class="space-y-6" hx-boost="true" action="/signup" method="post">
 						<div>
 							<label for="email" class="block text-sm font-medium leading-6 text-gray-600">
 								ユーザー名
@@ -73,12 +73,14 @@ templ SignUp() {
 							</button>
 						</div>
 					</form>
-					<p class="mt-10 text-center text-sm text-gray-500">
-						すでにアカウントをお持ちですか？
-						<a href="/login" class="font-bold leading-6 text-gray-600 hover:text-gray-300">
-							ログイン
-						</a>
-					</p>
+					<div hx-boost="true">
+						<p class="mt-10 text-center text-sm text-gray-500">
+							すでにアカウントをお持ちですか？
+							<a href="/login" class="font-bold leading-6 text-gray-600 hover:text-gray-300">
+								ログイン
+							</a>
+						</p>
+					</div>
 				</div>
 			</div>
 		</body>
