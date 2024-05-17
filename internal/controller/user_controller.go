@@ -28,6 +28,7 @@ func NewUserController(app *fiber.App, uu UserUsecase, store *session.Store) {
 	app.Post("/signup", user.SignUp)
 	app.Get("/login", user.Login)
 	app.Post("/login", user.Login)
+	app.Get("/logout", user.Logout)
 }
 
 func (uc *UserController) SignUp(c *fiber.Ctx) error {
@@ -80,4 +81,12 @@ func (uc *UserController) Login(c *fiber.Ctx) error {
 	component := templ.Handler(login)
 	handler := adaptor.HTTPHandler(component)
 	return handler(c)
+}
+
+func (uc *UserController) Logout(c *fiber.Ctx) error {
+	sess, _ := uc.store.Get(c)
+	if err := sess.Destroy(); err != nil {
+		return handleError(c, err, fiber.StatusInternalServerError)
+	}
+	return c.Redirect("/login")
 }
