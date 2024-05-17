@@ -5,15 +5,15 @@ package todo
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import "context"
-import "io"
-import "bytes"
-
 import (
+	"bytes"
+	"context"
 	"fmt"
-	"github.com/Anttoam/golang-htmx-todos/dto"
+	"io"
 	"strconv"
+
+	"github.com/Anttoam/golang-htmx-todos/dto"
+	"github.com/a-h/templ"
 )
 
 func List(res dto.FindAllTodoResponse) templ.Component {
