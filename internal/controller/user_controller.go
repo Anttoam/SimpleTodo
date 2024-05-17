@@ -47,6 +47,8 @@ func (uc *UserController) SignUp(c *fiber.Ctx) error {
 			return handleError(c, err, fiber.StatusInternalServerError)
 		}
 
+		return c.Redirect("/login")
+
 	}
 
 	signup := auth.SignUp()
