@@ -40,11 +40,12 @@ func (uc *UserController) SignUp(c *fiber.Ctx) error {
 		if err := parseAndHandleError(c, &req); err != nil {
 			return err
 		}
-	
+
 		ctx := c.Context()
 		if err := uc.uu.SignUp(ctx, req); err != nil {
 			return handleError(c, err, fiber.StatusInternalServerError)
-		}	
+		}
+
 	}
 
 	signup := auth.SignUp()
@@ -71,6 +72,8 @@ func (uc *UserController) Login(c *fiber.Ctx) error {
 		if err := sess.Save(); err != nil {
 			return handleError(c, err, fiber.StatusInternalServerError)
 		}
+
+		return c.Redirect("/todos")
 	}
 
 	login := auth.Login()

@@ -26,11 +26,11 @@ func NewTodoUsecase(tr TodoRepository) *TodoUsecase {
 
 func (tu *TodoUsecase) Create(ctx context.Context, req dto.CreateTodoRequest) error {
 	newTodo := &domain.Todo{
-		Title:     req.Title,
+		Title:       req.Title,
 		Description: req.Description,
-		UserID:    req.UserID,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		UserID:      req.UserID,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 	if err := tu.tr.Create(ctx, newTodo, req.UserID); err != nil {
 		return err
@@ -65,26 +65,18 @@ func (tu *TodoUsecase) FindByID(ctx context.Context, todoID int) (*dto.FindByIDT
 	return res, nil
 }
 
-func (tu *TodoUsecase) Update(ctx context.Context, req dto.UpdateTodoRequest) (*dto.UpdateTodoResponse, error) {
+func (tu *TodoUsecase) Update(ctx context.Context, req dto.UpdateTodoRequest) error {
 	updateTodo := &domain.Todo{
-		Title:     req.Title,
+		Title:       req.Title,
 		Description: req.Description,
-		UpdatedAt: time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 
 	if err := tu.tr.Update(ctx, updateTodo, req.ID); err != nil {
-		return nil, err
+		return err
 	}
 
-	res := &dto.UpdateTodoResponse{
-		ID:        req.ID,
-		Title:     updateTodo.Title,
-		Description: updateTodo.Description,
-		UserID:    updateTodo.UserID,
-		UpdatedAt: updateTodo.UpdatedAt,
-	}
-
-	return res, nil
+	return nil
 }
 
 func (tu *TodoUsecase) Delete(ctx context.Context, todoID int) error {

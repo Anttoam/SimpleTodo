@@ -6,15 +6,18 @@ import (
 	"strconv"
 
 	"github.com/Anttoam/golang-htmx-todos/dto"
+	"github.com/Anttoam/golang-htmx-todos/views/todo"
+	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
 type TodoUsecase interface {
-	Create(ctx context.Context, req dto.CreateTodoRequest) (*dto.CreateTodoResponse, error)
+	Create(ctx context.Context, req dto.CreateTodoRequest) error
 	FindAll(ctx context.Context, userID int) (*dto.FindAllTodoResponse, error)
 	FindByID(ctx context.Context, todoID int) (*dto.FindByIDTodoResponse, error)
-	Update(ctx context.Context, req dto.UpdateTodoRequest) (*dto.UpdateTodoResponse, error)
+	Update(ctx context.Context, req dto.UpdateTodoRequest) error
 	Delete(ctx context.Context, todoID int) error
 }
 
@@ -24,13 +27,14 @@ type TodoController struct {
 }
 
 func NewTodoController(app *fiber.App, tu TodoUsecase, store *session.Store) {
-	todo := &TodoController{tu: tu, store: store}
+	t := &TodoController{tu: tu, store: store}
 
-	app.Post("/create", todo.Create)
-	app.Get("/all", todo.FindAll)
-	app.Get("/:id", todo.FindByID)
-	app.Put("/:id", todo.Update)
-	app.Delete("/:id", todo.Delete)
+	app.Get("/create", t.Create)
+	app.Post("/create", t.Create)
+	app.Get("/todos", t.FindAll)
+	app.Get("/:id", t.FindByID)
+	app.Put("/:id", t.Update)
+	app.Delete("/:id", t.Delete)
 }
 
 func (t *TodoController) Create(c *fiber.Ctx) error {
@@ -40,20 +44,25 @@ func (t *TodoController) Create(c *fiber.Ctx) error {
 		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
 	}
 
-	var req dto.CreateTodoRequest
-	if err := parseAndHandleError(c, &req); err != nil {
-		return err
+	if c.Method() == fiber.MethodPost {
+		var req dto.CreateTodoRequest
+		if err := parseAndHandleError(c, &req); err != nil {
+			return err
+		}
+
+		req.UserID = id.(int)
+
+		ctx := c.Context()
+		if err := t.tu.Create(ctx, req); err != nil {
+			return handleError(c, err, fiber.StatusInternalServerError)
+		}
+
+		return c.Redirect("/todos")
 	}
 
-	req.UserID = id.(int)
-
-	ctx := c.Context()
-	res, err := t.tu.Create(ctx, req)
-	if err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
-	}
-
-	return c.Status(fiber.StatusOK).JSON(res)
+	component := todo.Create()
+	handler := adaptor.HTTPHandler(templ.Handler(component))
+	return handler(c)
 }
 
 func (t *TodoController) FindAll(c *fiber.Ctx) error {
@@ -70,7 +79,9 @@ func (t *TodoController) FindAll(c *fiber.Ctx) error {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(res)
+	component := todo.Page(*res)
+	handler := adaptor.HTTPHandler(templ.Handler(component))
+	return handler(c)
 }
 
 func (t *TodoController) FindByID(c *fiber.Ctx) error {
@@ -96,7 +107,9 @@ func (t *TodoController) FindByID(c *fiber.Ctx) error {
 		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(res)
+	component := todo.EditForm(strconv.Itoa(res.Todo.ID), res.Todo.Title, res.Todo.Description)
+	handler := adaptor.HTTPHandler(templ.Handler(component))
+	return handler(c)
 }
 
 func (t *TodoController) Update(c *fiber.Ctx) error {
@@ -120,20 +133,26 @@ func (t *TodoController) Update(c *fiber.Ctx) error {
 	req.ID = idP
 
 	ctx := c.Context()
-	todo, err := t.tu.FindByID(ctx, req.ID)
+	fetch, err := t.tu.FindByID(ctx, req.ID)
 	if err != nil {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
 
-	if todo.Todo.UserID != userID {
+	if fetch.Todo.UserID != userID {
 		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
 	}
-	res, err := t.tu.Update(ctx, req)
+	if err := t.tu.Update(ctx, req); err != nil {
+		return handleError(c, err, fiber.StatusInternalServerError)
+	}
+
+	res, err := t.tu.FindAll(ctx, userID)
 	if err != nil {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(res)
+	component := todo.List(*res)
+	handler := adaptor.HTTPHandler(templ.Handler(component))
+	return handler(c)
 }
 
 func (t *TodoController) Delete(c *fiber.Ctx) error {
@@ -149,18 +168,20 @@ func (t *TodoController) Delete(c *fiber.Ctx) error {
 	}
 
 	ctx := c.Context()
-	todo, err := t.tu.FindByID(ctx, idP)
+	res, err := t.tu.FindByID(ctx, idP)
 	if err != nil {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
 
-	if todo.Todo.UserID != id.(int) {
+	if res.Todo.UserID != id.(int) {
 		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
 	}
 
-	if err := t.tu.Delete(ctx, todo.Todo.ID); err != nil {
+	if err := t.tu.Delete(ctx, res.Todo.ID); err != nil {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
 
-	return c.Status(fiber.StatusNoContent).JSON(nil)
+	component := todo.Delete(strconv.Itoa(res.Todo.ID))
+	handler := adaptor.HTTPHandler(templ.Handler(component))
+	return handler(c)
 }
