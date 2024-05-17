@@ -36,7 +36,7 @@ func Page(res dto.FindAllTodoResponse) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body id=\"page\" class=\"bg-gray-200 p-4\"><h1 class=\"text-5xl font-bold text-center mb-8\">Go + HTMX</h1>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body id=\"page\" class=\"bg-gray-200 p-4\"><h1 class=\"text-5xl font-bold text-center mb-8\">Simple Todo</h1>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
