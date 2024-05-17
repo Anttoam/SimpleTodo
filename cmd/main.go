@@ -16,11 +16,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
-type Film struct {
-	Title    string
-	Director string
-}
-
 func main() {
 	cfgPath := config.GetConfigPath("local")
 	cfgFile, err := config.LoadConfig(cfgPath)
@@ -49,7 +44,7 @@ func main() {
 	redis := storage.NewRedisClient(cfg)
 	store := session.New(session.Config{
 		Storage:      redis,
-		Expiration:   10 * time.Minute,
+		Expiration:   12 * time.Hour,
 		KeyLookup:    "cookie:session_id",
 		CookiePath:   "/",
 		CookieDomain: "localhost",
