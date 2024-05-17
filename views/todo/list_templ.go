@@ -47,7 +47,7 @@ func List(res dto.FindAllTodoResponse) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"flex justify-between items-center border-b border-gray-300 py-2\"><div class=\"flex items-center space-x-3\"><input type=\"checkbox\" id=\"checkbox-{ strconv.Itoa(todo.ID) }\" x-model=\"show\" class=\"h-6 w-6\"><div class=\"flex-1 pr-8 ml-4\"><h3 class=\"text-lg font-semibold\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" x-data=\"{ open: false }\" class=\"flex justify-between items-center border-b border-gray-300 py-2\"><div class=\"flex items-center space-x-3\"><input type=\"checkbox\" id=\"checkbox-{ strconv.Itoa(todo.ID) }\" x-model=\"show\" class=\"h-6 w-6\"><div class=\"flex-1 pr-8 ml-4\"><h3 class=\"text-lg font-semibold\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

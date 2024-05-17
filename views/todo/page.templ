@@ -7,7 +7,7 @@ import (
 
 templ Page(res dto.FindAllTodoResponse) {
 	<!DOCTYPE html>
-	<html lang="ja" class="h-full">
+	<html lang="ja" class="h-full" x-data="{ open: false }">
 		@base.Header()
 		<body id="page" class="bg-gray-200 p-4">
 			<h1 class="text-5xl font-bold text-center mb-8">Go + HTMX</h1>
