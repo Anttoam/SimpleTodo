@@ -14,6 +14,7 @@ type TodoRepository interface {
 	FindByID(ctx context.Context, id int) (*domain.Todo, error)
 	Update(ctx context.Context, todo *domain.Todo, todoID int) error
 	Delete(ctx context.Context, todoID int) error
+	UpdateDoneStatus(ctx context.Context, todoID int, done bool) error
 }
 
 type TodoUsecase struct {
@@ -81,6 +82,20 @@ func (tu *TodoUsecase) Update(ctx context.Context, req dto.UpdateTodoRequest) er
 
 func (tu *TodoUsecase) Delete(ctx context.Context, todoID int) error {
 	if err := tu.tr.Delete(ctx, todoID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (tu *TodoUsecase) IsDone(ctx context.Context, todoID int) error {
+	if err := tu.tr.UpdateDoneStatus(ctx, todoID, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (tu *TodoUsecase) IsNotDone(ctx context.Context, todoID int) error {
+	if err := tu.tr.UpdateDoneStatus(ctx, todoID, false); err != nil {
 		return err
 	}
 	return nil

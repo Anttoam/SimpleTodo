@@ -23,7 +23,7 @@ func (r *TodoRepository) Create(ctx context.Context, todo *domain.Todo, userID i
 }
 
 func (r *TodoRepository) FindAll(ctx context.Context, userID int) ([]*domain.Todo, error) {
-	query := "SELECT id, title, description, user_id, created_at, updated_at FROM todos WHERE user_id = ?"
+	query := "SELECT id, title, description, done, user_id, created_at, updated_at FROM todos WHERE user_id = ?"
 	rows, err := r.db.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (r *TodoRepository) FindAll(ctx context.Context, userID int) ([]*domain.Tod
 		var todo domain.Todo
 		if err := rows.Scan(
 			&todo.ID, &todo.Title, &todo.Description,
-			&todo.UserID, &todo.CreatedAt, &todo.UpdatedAt,
+			&todo.Done, &todo.UserID, &todo.CreatedAt, &todo.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -49,12 +49,12 @@ func (r *TodoRepository) FindAll(ctx context.Context, userID int) ([]*domain.Tod
 }
 
 func (r *TodoRepository) FindByID(ctx context.Context, todoID int) (*domain.Todo, error) {
-	query := "SELECT id, title, description, user_id, created_at, updated_at FROM todos WHERE id = ?"
+	query := "SELECT id, title, description, done, user_id, created_at, updated_at FROM todos WHERE id = ?"
 	row := r.db.QueryRowContext(ctx, query, todoID)
 	var todo domain.Todo
 	if err := row.Scan(
 		&todo.ID, &todo.Title, &todo.Description,
-		&todo.UserID, &todo.CreatedAt, &todo.UpdatedAt,
+		&todo.Done, &todo.UserID, &todo.CreatedAt, &todo.UpdatedAt,
 	); err != nil {
 		return nil, err
 	}
@@ -73,6 +73,15 @@ func (r *TodoRepository) Update(ctx context.Context, todo *domain.Todo, todoID i
 func (r *TodoRepository) Delete(ctx context.Context, todoID int) error {
 	query := "DELETE FROM todos WHERE id = ?"
 	_, err := r.db.ExecContext(ctx, query, todoID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *TodoRepository) UpdateDoneStatus(ctx context.Context, todoID int, done bool) error {
+	query := "UPDATE todos SET done = ? WHERE id = ?"
+	_, err := r.db.ExecContext(ctx, query, done, todoID)
 	if err != nil {
 		return err
 	}

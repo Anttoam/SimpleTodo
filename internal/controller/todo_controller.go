@@ -19,6 +19,8 @@ type TodoUsecase interface {
 	FindByID(ctx context.Context, todoID int) (*dto.FindByIDTodoResponse, error)
 	Update(ctx context.Context, req dto.UpdateTodoRequest) error
 	Delete(ctx context.Context, todoID int) error
+	IsDone(ctx context.Context, todoID int) error
+	IsNotDone(ctx context.Context, todoID int) error
 }
 
 type TodoController struct {
@@ -35,6 +37,8 @@ func NewTodoController(app *fiber.App, tu TodoUsecase, store *session.Store) {
 	app.Get("/:id", t.FindByID)
 	app.Put("/:id", t.Update)
 	app.Delete("/:id", t.Delete)
+	app.Put("/done/:id", t.IsDone)
+	app.Put("/notdone/:id", t.IsNotDone)
 }
 
 func (t *TodoController) Create(c *fiber.Ctx) error {
@@ -184,4 +188,12 @@ func (t *TodoController) Delete(c *fiber.Ctx) error {
 	component := todo.Delete(strconv.Itoa(res.Todo.ID))
 	handler := adaptor.HTTPHandler(templ.Handler(component))
 	return handler(c)
+}
+
+func (t *TodoController) IsDone(c *fiber.Ctx) error {
+	return t.changeStatus(c, t.tu.IsDone)
+}
+
+func (t *TodoController) IsNotDone(c *fiber.Ctx) error {
+	return t.changeStatus(c, t.tu.IsNotDone)
 }
