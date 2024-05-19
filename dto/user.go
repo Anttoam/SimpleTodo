@@ -1,6 +1,10 @@
 package dto
 
-import "time"
+import (
+	"time"
+
+	"github.com/Anttoam/golang-htmx-todos/domain"
+)
 
 type SignUpRequest struct {
 	Name     string `json:"name"`
@@ -22,4 +26,16 @@ type LoginRequest struct {
 type LoginResponse struct {
 	ID    int    `json:"id"`
 	Email string `json:"email"`
+}
+
+type FindByIDUserResponse struct {
+	User *domain.User `json:"user"`
+}
+
+type UpdateUserRequest struct {
+	ID        int       `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

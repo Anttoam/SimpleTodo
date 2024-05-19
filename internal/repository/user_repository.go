@@ -25,11 +25,33 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 	return nil
 }
 
-func (r *UserRepository) GetUserByEmail(ctx context.Context, email string, user *domain.User) error {
+func (r *UserRepository) FindUserByEmail(ctx context.Context, email string, user *domain.User) error {
 	query := "SELECT id, name, email, password, created_at, updated_at FROM users WHERE email = ?"
 	row := r.db.QueryRowContext(ctx, query, email)
 
 	if err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *UserRepository) FindByID(ctx context.Context, userID int) (*domain.User, error) {
+	query := "SELECT id, name, email, password, created_at, updated_at FROM users WHERE id = ?"
+	row := u.db.QueryRowContext(ctx, query, userID)
+	var user domain.User
+	if err := row.Scan(
+		&user.ID, &user.Name, &user.Email,
+		&user.Password, &user.CreatedAt, &user.UpdatedAt,
+	); err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *UserRepository) Update(ctx context.Context, user *domain.User, userID int) error {
+	query := "UPDATE users SET name = ?, email = ?, password = ?, updated_at = ? WHERE id = ?"
+	_, err := r.db.ExecContext(ctx, query, &user.Name, &user.Email, &user.Password, time.Now(), userID)
+	if err != nil {
 		return err
 	}
 	return nil

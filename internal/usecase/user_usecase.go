@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Anttoam/golang-htmx-todos/domain"
 	"github.com/Anttoam/golang-htmx-todos/dto"
@@ -11,7 +12,9 @@ import (
 
 type UserRepository interface {
 	Create(ctx context.Context, user *domain.User) error
-	GetUserByEmail(ctx context.Context, email string, user *domain.User) error
+	FindUserByEmail(ctx context.Context, email string, user *domain.User) error
+	FindByID(ctx context.Context, userID int) (*domain.User, error)
+	Update(ctx context.Context, user *domain.User, userID int) error
 }
 
 type UserUsecase struct {
@@ -43,7 +46,7 @@ func (u *UserUsecase) SignUp(ctx context.Context, req dto.SignUpRequest) error {
 
 func (u *UserUsecase) Login(ctx context.Context, req dto.LoginRequest) (*dto.LoginResponse, error) {
 	user := domain.User{}
-	if err := u.ur.GetUserByEmail(ctx, req.Email, &user); err != nil {
+	if err := u.ur.FindUserByEmail(ctx, req.Email, &user); err != nil {
 		return nil, err
 	}
 
@@ -57,4 +60,31 @@ func (u *UserUsecase) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 	}
 
 	return res, nil
+}
+
+func (u *UserUsecase) FindByID(ctx context.Context, userID int) (*dto.FindByIDUserResponse, error) {
+	user, err := u.ur.FindByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &dto.FindByIDUserResponse{
+		User: user,
+	}
+
+	return res, nil
+}
+
+func (u *UserUsecase) EditUser(ctx context.Context, req dto.UpdateUserRequest) error {
+	updatedUser := domain.User{
+		Name:      req.Name,
+		Email:     req.Email,
+		Password:  req.Password,
+		UpdatedAt: time.Now(),
+	}
+	if err := u.ur.Update(ctx, &updatedUser, req.ID); err != nil {
+		return err
+	}
+
+	return nil
 }

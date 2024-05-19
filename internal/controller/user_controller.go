@@ -2,8 +2,11 @@ package controller
 
 import (
 	"context"
+	"errors"
+	"strconv"
 
 	"github.com/Anttoam/golang-htmx-todos/dto"
+	"github.com/Anttoam/golang-htmx-todos/views/todo"
 	"github.com/Anttoam/golang-htmx-todos/views/user"
 	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
@@ -14,6 +17,8 @@ import (
 type UserUsecase interface {
 	SignUp(ctx context.Context, user dto.SignUpRequest) error
 	Login(ctx context.Context, user dto.LoginRequest) (*dto.LoginResponse, error)
+	FindByID(ctx context.Context, userID int) (*dto.FindByIDUserResponse, error)
+	EditUser(ctx context.Context, user dto.UpdateUserRequest) error
 }
 
 type UserController struct {
@@ -24,11 +29,14 @@ type UserController struct {
 func NewUserController(app *fiber.App, uu UserUsecase, store *session.Store) {
 	uc := &UserController{uu: uu, store: store}
 
-	app.Get("/signup", uc.SignUp)
-	app.Post("/signup", uc.SignUp)
-	app.Get("/login", uc.Login)
-	app.Post("/login", uc.Login)
-	app.Get("/logout", uc.Logout)
+	api := app.Group("/user")
+	api.Get("/signup", uc.SignUp)
+	api.Post("/signup", uc.SignUp)
+	api.Get("/login", uc.Login)
+	api.Post("/login", uc.Login)
+	api.Get("/logout", uc.Logout)
+	api.Get("/:id", uc.EditUser)
+	api.Put("/:id", uc.EditUser)
 }
 
 func (uc *UserController) SignUp(c *fiber.Ctx) error {
@@ -47,7 +55,7 @@ func (uc *UserController) SignUp(c *fiber.Ctx) error {
 			return handleError(c, err, fiber.StatusInternalServerError)
 		}
 
-		return c.Redirect("/login")
+		return c.Redirect("/user/login")
 
 	}
 
@@ -88,5 +96,62 @@ func (uc *UserController) Logout(c *fiber.Ctx) error {
 	if err := sess.Destroy(); err != nil {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
-	return c.Redirect("/login")
+	return c.Redirect("/user/login")
+}
+
+func (uc *UserController) EditUser(c *fiber.Ctx) error {
+	var userID int
+	sess, _ := uc.store.Get(c)
+	id := sess.Get("id")
+	if id == nil {
+		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+	}
+	userID = id.(int)
+
+	var fetch *dto.FindByIDUserResponse
+
+	if c.Method() == fiber.MethodPut {
+		var req dto.UpdateUserRequest
+		if err := parseAndHandleError(c, &req); err != nil {
+			return err
+		}
+
+		sess, _ := uc.store.Get(c)
+		id := sess.Get("id")
+		if id == nil {
+			return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		}
+		userID := id.(int)
+
+		idP, err := strconv.Atoi(c.Params("id"))
+		if err != nil {
+			return handleError(c, err, fiber.StatusNotFound)
+		}
+
+		req.ID = idP
+
+		ctx := c.Context()
+		fetch, err := uc.uu.FindByID(ctx, req.ID)
+		if err != nil {
+			return handleError(c, err, fiber.StatusInternalServerError)
+		}
+
+		if fetch.User.ID != userID {
+			return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		}
+		if err := uc.uu.EditUser(ctx, req); err != nil {
+			return handleError(c, err, fiber.StatusInternalServerError)
+		}
+
+	}
+
+	ctx := c.Context()
+	fetch, err := uc.uu.FindByID(ctx, userID)
+	if err != nil {
+		return handleError(c, err, fiber.StatusInternalServerError)
+	}
+
+	component := templ.Handler(todo.EditUser(strconv.Itoa(userID), fetch.User.Name, fetch.User.Email, fetch.User.Password))
+	handler := adaptor.HTTPHandler(component)
+	return handler(c)
 }
