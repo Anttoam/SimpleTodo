@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/Anttoam/golang-htmx-todos/dto"
-	"github.com/Anttoam/golang-htmx-todos/views/auth"
+	"github.com/Anttoam/golang-htmx-todos/views/user"
 	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
@@ -22,13 +22,13 @@ type UserController struct {
 }
 
 func NewUserController(app *fiber.App, uu UserUsecase, store *session.Store) {
-	user := &UserController{uu: uu, store: store}
+	uc := &UserController{uu: uu, store: store}
 
-	app.Get("/signup", user.SignUp)
-	app.Post("/signup", user.SignUp)
-	app.Get("/login", user.Login)
-	app.Post("/login", user.Login)
-	app.Get("/logout", user.Logout)
+	app.Get("/signup", uc.SignUp)
+	app.Post("/signup", uc.SignUp)
+	app.Get("/login", uc.Login)
+	app.Post("/login", uc.Login)
+	app.Get("/logout", uc.Logout)
 }
 
 func (uc *UserController) SignUp(c *fiber.Ctx) error {
@@ -51,8 +51,7 @@ func (uc *UserController) SignUp(c *fiber.Ctx) error {
 
 	}
 
-	signup := auth.SignUp()
-	component := templ.Handler(signup)
+	component := templ.Handler(user.SignUp())
 	handler := adaptor.HTTPHandler(component)
 	return handler(c)
 }
@@ -79,8 +78,7 @@ func (uc *UserController) Login(c *fiber.Ctx) error {
 		return c.Redirect("/todos")
 	}
 
-	login := auth.Login()
-	component := templ.Handler(login)
+	component := templ.Handler(user.Login())
 	handler := adaptor.HTTPHandler(component)
 	return handler(c)
 }

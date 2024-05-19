@@ -1,6 +1,6 @@
 package components
 
-import "github.com/Anttoam/golang-htmx-todos/views/auth"
+import "github.com/Anttoam/golang-htmx-todos/views/user"
 
 templ NavBar() {
 	<div hx-boost="true" class="flex justify-between py-8 px-8">
@@ -8,7 +8,7 @@ templ NavBar() {
 		<nav>
 			<ul class="flex justify-end space-x-4 pr-8">
 				<li><a>アカウント</a></li>
-				@auth.Logout()
+				@user.Logout()
 			</ul>
 		</nav>
 	</div>

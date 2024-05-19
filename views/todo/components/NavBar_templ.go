@@ -10,7 +10,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/Anttoam/golang-htmx-todos/views/auth"
+	"github.com/Anttoam/golang-htmx-todos/views/user"
 	"github.com/a-h/templ"
 )
 
@@ -31,7 +31,7 @@ func NavBar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = auth.Logout().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = user.Logout().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
