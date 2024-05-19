@@ -3,9 +3,10 @@ package controller
 import (
 	"context"
 	"errors"
+	"log"
 	"strconv"
 
-	"github.com/Anttoam/golang-htmx-todos/views/todo/components"
+	"github.com/Anttoam/golang-htmx-todos/views/todo"
 	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
@@ -20,6 +21,7 @@ func parseAndHandleError(c *fiber.Ctx, req interface{}) error {
 }
 
 func handleError(c *fiber.Ctx, err error, statusCode int) error {
+	log.Println(err)
 	return c.Status(statusCode).JSON(fiber.Map{
 		"error": err.Error(),
 	})
@@ -57,7 +59,7 @@ func (t *TodoController) changeStatus(c *fiber.Ctx, changeFunc func(ctx context.
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
 
-	component := components.List(*res)
+	component := todo.List(*res)
 	handler := adaptor.HTTPHandler(templ.Handler(component))
 	return handler(c)
 }
