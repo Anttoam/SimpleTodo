@@ -12,6 +12,7 @@ import (
 
 	"github.com/Anttoam/golang-htmx-todos/dto"
 	"github.com/Anttoam/golang-htmx-todos/views/base"
+	"github.com/Anttoam/golang-htmx-todos/views/todo/components"
 	"github.com/a-h/templ"
 )
 
@@ -40,7 +41,7 @@ func Page(res dto.FindAllTodoResponse) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NavBar().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.NavBar().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -48,11 +49,11 @@ func Page(res dto.FindAllTodoResponse) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = Create().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.Create().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = List(res).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.List(res).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

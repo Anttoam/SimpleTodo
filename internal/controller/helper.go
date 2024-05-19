@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/Anttoam/golang-htmx-todos/views/todo"
+	"github.com/Anttoam/golang-htmx-todos/views/todo/components"
 	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
@@ -57,7 +57,7 @@ func (t *TodoController) changeStatus(c *fiber.Ctx, changeFunc func(ctx context.
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
 
-	component := todo.List(*res)
+	component := components.List(*res)
 	handler := adaptor.HTTPHandler(templ.Handler(component))
 	return handler(c)
 }

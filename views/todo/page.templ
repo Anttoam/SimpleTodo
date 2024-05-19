@@ -3,6 +3,7 @@ package todo
 import (
 	"github.com/Anttoam/golang-htmx-todos/views/base"
 	"github.com/Anttoam/golang-htmx-todos/dto"
+	"github.com/Anttoam/golang-htmx-todos/views/todo/components"
 )
 
 templ Page(res dto.FindAllTodoResponse) {
@@ -10,10 +11,10 @@ templ Page(res dto.FindAllTodoResponse) {
 	<html lang="ja" class="h-full" x-data="{ open: false }">
 		@base.Header()
 		<body id="page" class="bg-gray-200 p-4">
-			@NavBar()
+			@components.NavBar()
 			<div class="px-8">
-				@Create()
-				@List(res)
+				@components.Create()
+				@components.List(res)
 			</div>
 		</body>
 	</html>

@@ -7,6 +7,7 @@ import (
 
 	"github.com/Anttoam/golang-htmx-todos/dto"
 	"github.com/Anttoam/golang-htmx-todos/views/todo"
+	"github.com/Anttoam/golang-htmx-todos/views/todo/components"
 	"github.com/a-h/templ"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
@@ -64,7 +65,7 @@ func (t *TodoController) Create(c *fiber.Ctx) error {
 		return c.Redirect("/todos")
 	}
 
-	component := todo.Create()
+	component := components.Create()
 	handler := adaptor.HTTPHandler(templ.Handler(component))
 	return handler(c)
 }
@@ -111,7 +112,7 @@ func (t *TodoController) FindByID(c *fiber.Ctx) error {
 		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
 	}
 
-	component := todo.EditForm(strconv.Itoa(res.Todo.ID), res.Todo.Title, res.Todo.Description)
+	component := components.EditForm(strconv.Itoa(res.Todo.ID), res.Todo.Title, res.Todo.Description)
 	handler := adaptor.HTTPHandler(templ.Handler(component))
 	return handler(c)
 }
@@ -154,7 +155,7 @@ func (t *TodoController) Update(c *fiber.Ctx) error {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
 
-	component := todo.List(*res)
+	component := components.List(*res)
 	handler := adaptor.HTTPHandler(templ.Handler(component))
 	return handler(c)
 }
@@ -185,7 +186,7 @@ func (t *TodoController) Delete(c *fiber.Ctx) error {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
 
-	component := todo.Delete(strconv.Itoa(res.Todo.ID))
+	component := components.Delete(strconv.Itoa(res.Todo.ID))
 	handler := adaptor.HTTPHandler(templ.Handler(component))
 	return handler(c)
 }
