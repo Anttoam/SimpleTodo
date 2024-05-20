@@ -1,12 +1,12 @@
 package todo
 
 import (
-    "github.com/Anttoam/golang-htmx-todos/views/base"
+	"github.com/Anttoam/golang-htmx-todos/views/base"
 	"fmt"
 )
 
-templ EditUser(id string, name string, email string, password string) {
-    <!DOCTYPE html>
+templ EditUser(id string, name string, email string) {
+	<!DOCTYPE html>
 	<html lang="ja" class="h-full">
 		@base.Header()
 		<body id="edit-page" class="bg-gray-200">
@@ -57,9 +57,16 @@ templ EditUser(id string, name string, email string, password string) {
 							</button>
 						</div>
 					</form>
+					<div hx-boost="true">
+						<p class="mt-10 text-center text-sm text-gray-500">
+							パスワードを変更しますか？
+							<a href={ templ.SafeURL(fmt.Sprintf("/user/password/%s", id)) } class="font-bold leading-6 text-gray-600 hover:text-gray-300">
+								はい
+							</a>
+						</p>
+					</div>
 				</div>
 			</div>
 		</body>
 	</html>
 }
-
