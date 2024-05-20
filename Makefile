@@ -4,7 +4,9 @@ export $(shell sed 's/=.*//' .env)
 db-shall:
 	turso db shell todo
 
-lint:
+check-code:
+	gofmt -w .
+	goimports -w .
 	golangci-lint run
 
 redis:
@@ -19,4 +21,4 @@ atlas-apply:
 migrate:
 	atlas schema apply -u "${TURSO_DB_URL}?authToken=${TURSO_DB_TOKEN}" --to sqlite://migration/todo.db
 
-.PHONY: db-shall lint redis atlas-inspect atlas-apply migrate
+.PHONY: db-shall check-code redis atlas-inspect atlas-apply migrate
