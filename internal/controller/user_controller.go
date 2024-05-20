@@ -17,7 +17,7 @@ import (
 type UserUsecase interface {
 	SignUp(ctx context.Context, user dto.SignUpRequest) error
 	Login(ctx context.Context, user dto.LoginRequest) (*dto.LoginResponse, error)
-	FindByID(ctx context.Context, userID int) (*dto.FindByIDUserResponse, error)
+	FindUserByID(ctx context.Context, userID int) (*dto.FindByIDUserResponse, error)
 	EditUser(ctx context.Context, user dto.UpdateUserRequest) error
 	EditPassword(ctx context.Context, user dto.UpdatePasswordRequest) error
 }
@@ -134,7 +134,7 @@ func (uc *UserController) EditUser(c *fiber.Ctx) error {
 		req.ID = idP
 
 		ctx := c.Context()
-		fetch, err := uc.uu.FindByID(ctx, req.ID)
+		fetch, err := uc.uu.FindUserByID(ctx, req.ID)
 		if err != nil {
 			return handleError(c, err, fiber.StatusInternalServerError)
 		}
@@ -150,7 +150,7 @@ func (uc *UserController) EditUser(c *fiber.Ctx) error {
 	}
 
 	ctx := c.Context()
-	fetch, err := uc.uu.FindByID(ctx, userID)
+	fetch, err := uc.uu.FindUserByID(ctx, userID)
 	if err != nil {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
@@ -190,7 +190,7 @@ func (uc *UserController) EditPassword(c *fiber.Ctx) error {
 		req.ID = idP
 
 		ctx := c.Context()
-		fetch, err := uc.uu.FindByID(ctx, req.ID)
+		fetch, err := uc.uu.FindUserByID(ctx, req.ID)
 		if err != nil {
 			return handleError(c, err, fiber.StatusInternalServerError)
 		}

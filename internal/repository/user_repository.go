@@ -16,18 +16,18 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
+func (ur *UserRepository) Create(ctx context.Context, user *domain.User) error {
 	query := "INSERT INTO users (name, email, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
-	_, err := r.db.ExecContext(ctx, query, &user.Name, &user.Email, &user.Password, time.Now(), time.Now())
+	_, err := ur.db.ExecContext(ctx, query, &user.Name, &user.Email, &user.Password, time.Now(), time.Now())
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *UserRepository) FindUserByEmail(ctx context.Context, email string, user *domain.User) error {
+func (ur *UserRepository) FindByEmail(ctx context.Context, email string, user *domain.User) error {
 	query := "SELECT id, name, email, password, created_at, updated_at FROM users WHERE email = ?"
-	row := r.db.QueryRowContext(ctx, query, email)
+	row := ur.db.QueryRowContext(ctx, query, email)
 
 	if err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt); err != nil {
 		return err
@@ -35,9 +35,9 @@ func (r *UserRepository) FindUserByEmail(ctx context.Context, email string, user
 	return nil
 }
 
-func (u *UserRepository) FindByID(ctx context.Context, userID int) (*domain.User, error) {
+func (ur *UserRepository) FindByID(ctx context.Context, userID int) (*domain.User, error) {
 	query := "SELECT id, name, email, password, created_at, updated_at FROM users WHERE id = ?"
-	row := u.db.QueryRowContext(ctx, query, userID)
+	row := ur.db.QueryRowContext(ctx, query, userID)
 	var user domain.User
 	if err := row.Scan(
 		&user.ID, &user.Name, &user.Email,
@@ -48,9 +48,9 @@ func (u *UserRepository) FindByID(ctx context.Context, userID int) (*domain.User
 	return &user, nil
 }
 
-func (r *UserRepository) Update(ctx context.Context, user *domain.User, userID int) error {
+func (ur *UserRepository) Update(ctx context.Context, user *domain.User, userID int) error {
 	query := "UPDATE users SET name = ?, email = ?, password = ?, updated_at = ? WHERE id = ?"
-	_, err := r.db.ExecContext(ctx, query, &user.Name, &user.Email, &user.Password, time.Now(), userID)
+	_, err := ur.db.ExecContext(ctx, query, &user.Name, &user.Email, &user.Password, time.Now(), userID)
 	if err != nil {
 		return err
 	}

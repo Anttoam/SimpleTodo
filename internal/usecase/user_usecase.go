@@ -12,7 +12,7 @@ import (
 
 type UserRepository interface {
 	Create(ctx context.Context, user *domain.User) error
-	FindUserByEmail(ctx context.Context, email string, user *domain.User) error
+	FindByEmail(ctx context.Context, email string, user *domain.User) error
 	FindByID(ctx context.Context, userID int) (*domain.User, error)
 	Update(ctx context.Context, user *domain.User, userID int) error
 }
@@ -25,7 +25,7 @@ func NewUserUsecase(ur UserRepository) *UserUsecase {
 	return &UserUsecase{ur: ur}
 }
 
-func (u *UserUsecase) SignUp(ctx context.Context, req dto.SignUpRequest) error {
+func (uu *UserUsecase) SignUp(ctx context.Context, req dto.SignUpRequest) error {
 	hashedPassword, err := utils.HashPassword(req.Password)
 	if err != nil {
 		return fmt.Errorf("failed to hash password: %w", err)
@@ -37,16 +37,16 @@ func (u *UserUsecase) SignUp(ctx context.Context, req dto.SignUpRequest) error {
 		Password: hashedPassword,
 	}
 
-	if err := u.ur.Create(ctx, user); err != nil {
+	if err := uu.ur.Create(ctx, user); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (u *UserUsecase) Login(ctx context.Context, req dto.LoginRequest) (*dto.LoginResponse, error) {
+func (uu *UserUsecase) Login(ctx context.Context, req dto.LoginRequest) (*dto.LoginResponse, error) {
 	user := domain.User{}
-	if err := u.ur.FindUserByEmail(ctx, req.Email, &user); err != nil {
+	if err := uu.ur.FindByEmail(ctx, req.Email, &user); err != nil {
 		return nil, err
 	}
 
@@ -62,8 +62,8 @@ func (u *UserUsecase) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 	return res, nil
 }
 
-func (u *UserUsecase) FindByID(ctx context.Context, userID int) (*dto.FindByIDUserResponse, error) {
-	user, err := u.ur.FindByID(ctx, userID)
+func (uu *UserUsecase) FindUserByID(ctx context.Context, userID int) (*dto.FindByIDUserResponse, error) {
+	user, err := uu.ur.FindByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -75,8 +75,8 @@ func (u *UserUsecase) FindByID(ctx context.Context, userID int) (*dto.FindByIDUs
 	return res, nil
 }
 
-func (u *UserUsecase) EditUser(ctx context.Context, req dto.UpdateUserRequest) error {
-	user, err := u.ur.FindByID(ctx, req.ID)
+func (uu *UserUsecase) EditUser(ctx context.Context, req dto.UpdateUserRequest) error {
+	user, err := uu.ur.FindByID(ctx, req.ID)
 	if err != nil {
 		return err
 	}
@@ -87,15 +87,15 @@ func (u *UserUsecase) EditUser(ctx context.Context, req dto.UpdateUserRequest) e
 		Password:  user.Password,
 		UpdatedAt: time.Now(),
 	}
-	if err := u.ur.Update(ctx, &updatedUser, req.ID); err != nil {
+	if err := uu.ur.Update(ctx, &updatedUser, req.ID); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (u *UserUsecase) EditPassword(ctx context.Context, req dto.UpdatePasswordRequest) error {
-	user, err := u.ur.FindByID(ctx, req.ID)
+func (uu *UserUsecase) EditPassword(ctx context.Context, req dto.UpdatePasswordRequest) error {
+	user, err := uu.ur.FindByID(ctx, req.ID)
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func (u *UserUsecase) EditPassword(ctx context.Context, req dto.UpdatePasswordRe
 		Password:  hashedPassword,
 		UpdatedAt: time.Now(),
 	}
-	if err := u.ur.Update(ctx, &updatedUser, req.ID); err != nil {
+	if err := uu.ur.Update(ctx, &updatedUser, req.ID); err != nil {
 		return err
 	}
 
