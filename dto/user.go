@@ -36,6 +36,12 @@ type UpdateUserRequest struct {
 	ID        int       `json:"id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
-	Password  string    `json:"password"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type UpdatePasswordRequest struct {
+	ID          int       `json:"id"`
+	Password    string    `json:"password"`
+	NewPassword string    `json:"new_password"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }

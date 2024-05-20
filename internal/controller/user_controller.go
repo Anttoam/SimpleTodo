@@ -19,6 +19,7 @@ type UserUsecase interface {
 	Login(ctx context.Context, user dto.LoginRequest) (*dto.LoginResponse, error)
 	FindByID(ctx context.Context, userID int) (*dto.FindByIDUserResponse, error)
 	EditUser(ctx context.Context, user dto.UpdateUserRequest) error
+	EditPassword(ctx context.Context, user dto.UpdatePasswordRequest) error
 }
 
 type UserController struct {
@@ -37,6 +38,8 @@ func NewUserController(app *fiber.App, uu UserUsecase, store *session.Store) {
 	api.Get("/logout", uc.Logout)
 	api.Get("/:id", uc.EditUser)
 	api.Put("/:id", uc.EditUser)
+	api.Get("/password/:id", uc.EditPassword)
+	api.Put("/password/:id", uc.EditPassword)
 }
 
 func (uc *UserController) SignUp(c *fiber.Ctx) error {
@@ -139,6 +142,7 @@ func (uc *UserController) EditUser(c *fiber.Ctx) error {
 		if fetch.User.ID != userID {
 			return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
 		}
+
 		if err := uc.uu.EditUser(ctx, req); err != nil {
 			return handleError(c, err, fiber.StatusInternalServerError)
 		}
@@ -151,7 +155,60 @@ func (uc *UserController) EditUser(c *fiber.Ctx) error {
 		return handleError(c, err, fiber.StatusInternalServerError)
 	}
 
-	component := templ.Handler(todo.EditUser(strconv.Itoa(userID), fetch.User.Name, fetch.User.Email, fetch.User.Password))
+	component := templ.Handler(todo.EditUser(strconv.Itoa(userID), fetch.User.Name, fetch.User.Email))
+	handler := adaptor.HTTPHandler(component)
+	return handler(c)
+}
+
+func (uc *UserController) EditPassword(c *fiber.Ctx) error {
+	var userID int
+	sess, _ := uc.store.Get(c)
+	id := sess.Get("id")
+	if id == nil {
+		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+	}
+	userID = id.(int)
+
+	if c.Method() == fiber.MethodPut {
+		var req dto.UpdatePasswordRequest
+		if err := parseAndHandleError(c, &req); err != nil {
+			return err
+		}
+
+		sess, _ := uc.store.Get(c)
+		id := sess.Get("id")
+		if id == nil {
+			return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		}
+		userID := id.(int)
+
+		idP, err := strconv.Atoi(c.Params("id"))
+		if err != nil {
+			return handleError(c, err, fiber.StatusNotFound)
+		}
+
+		req.ID = idP
+
+		ctx := c.Context()
+		fetch, err := uc.uu.FindByID(ctx, req.ID)
+		if err != nil {
+			return handleError(c, err, fiber.StatusInternalServerError)
+		}
+
+		req.Password = c.FormValue("password")
+		req.NewPassword = c.FormValue("new_password")
+
+		if fetch.User.ID != userID {
+			return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		}
+
+		if err := uc.uu.EditPassword(ctx, req); err != nil {
+			return handleError(c, err, fiber.StatusInternalServerError)
+		}
+
+	}
+
+	component := templ.Handler(todo.EditPassword(strconv.Itoa(userID)))
 	handler := adaptor.HTTPHandler(component)
 	return handler(c)
 }

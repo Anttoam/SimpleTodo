@@ -76,10 +76,43 @@ func (u *UserUsecase) FindByID(ctx context.Context, userID int) (*dto.FindByIDUs
 }
 
 func (u *UserUsecase) EditUser(ctx context.Context, req dto.UpdateUserRequest) error {
+	user, err := u.ur.FindByID(ctx, req.ID)
+	if err != nil {
+		return err
+	}
+
 	updatedUser := domain.User{
 		Name:      req.Name,
 		Email:     req.Email,
-		Password:  req.Password,
+		Password:  user.Password,
+		UpdatedAt: time.Now(),
+	}
+	if err := u.ur.Update(ctx, &updatedUser, req.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *UserUsecase) EditPassword(ctx context.Context, req dto.UpdatePasswordRequest) error {
+	user, err := u.ur.FindByID(ctx, req.ID)
+	if err != nil {
+		return err
+	}
+
+	if err := utils.CheckPassword(req.Password, user.Password); err != nil {
+		return fmt.Errorf("password does not match: %w", err)
+	}
+
+	hashedPassword, err := utils.HashPassword(req.NewPassword)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	updatedUser := domain.User{
+		Name:      user.Name,
+		Email:     user.Email,
+		Password:  hashedPassword,
 		UpdatedAt: time.Now(),
 	}
 	if err := u.ur.Update(ctx, &updatedUser, req.ID); err != nil {
