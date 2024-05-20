@@ -3,6 +3,7 @@ module github.com/Anttoam/golang-htmx-todos
 go 1.22.2
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/a-h/templ v0.2.680
 	github.com/gofiber/fiber/v2 v2.52.4
 	github.com/gofiber/storage/redis/v3 v3.1.1
