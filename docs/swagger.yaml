@@ -1,0 +1,123 @@
+definitions:
+  dto.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.SignUpRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.UpdatePasswordRequest:
+    properties:
+      id:
+        type: integer
+      new_password:
+        type: string
+      password:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dto.UpdateUserRequest:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: example todo api
+  title: Simple Todo API
+  version: "1.0"
+paths:
+  /user/:id:
+    put:
+      description: Edit user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Edit User Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRequest'
+      responses: {}
+      summary: Edit User
+      tags:
+      - user
+  /user/login:
+    post:
+      description: Login user
+      parameters:
+      - description: Login Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      responses: {}
+      summary: Login
+      tags:
+      - user
+  /user/logout:
+    get:
+      description: Logout user
+      responses: {}
+      summary: Logout
+      tags:
+      - user
+  /user/password/:id:
+    put:
+      description: Edit password
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Edit Password Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdatePasswordRequest'
+      responses: {}
+      summary: Edit Password
+      tags:
+      - user
+  /user/signup:
+    post:
+      description: Create a new user
+      parameters:
+      - description: Create User Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignUpRequest'
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: Signup
+      tags:
+      - user
+swagger: "2.0"
