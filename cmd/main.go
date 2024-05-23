@@ -14,8 +14,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/session"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
+
+	_ "github.com/Anttoam/golang-htmx-todos/docs"
 )
 
+// @title			Simple Todo API
+// @version		1.0
+// @description	example todo api
 func main() {
 	cfgPath := config.GetConfigPath("local")
 	cfgFile, err := config.LoadConfig(cfgPath)
@@ -41,6 +47,8 @@ func main() {
 
 	app := fiber.New()
 	app.Use(logger.New())
+	app.Get("/swagger/*", fiberSwagger.WrapHandler)
+
 	redis := storage.NewRedisClient(cfg)
 	store := session.New(session.Config{
 		Storage:      redis,
