@@ -42,6 +42,18 @@ func NewUserController(app *fiber.App, uu UserUsecase, store *session.Store) {
 	api.Put("/password/:id", uc.EditPassword)
 }
 
+// Signup godoc
+//
+//	@Summary		Signup
+//	@Description	Create a new user
+//	@Tags			user
+//
+// Accept json
+// Produce json
+//
+//	@Param			request	body		dto.SignUpRequest	true	"Create User Request"
+//	@Success		200		{string}	string				"ok"
+//	@Router			/user/signup [post]
 func (uc *UserController) SignUp(c *fiber.Ctx) error {
 	if c.Method() == fiber.MethodPost {
 		req := dto.SignUpRequest{
@@ -67,6 +79,17 @@ func (uc *UserController) SignUp(c *fiber.Ctx) error {
 	return handler(c)
 }
 
+// Login godoc
+//
+//	@Summary		Login
+//	@Description	Login user
+//	@Tags			user
+//
+// Accept json
+// Produce json
+//
+//	@Param			request	body	dto.LoginRequest	true	"Login Request"
+//	@Router			/user/login [post]
 func (uc *UserController) Login(c *fiber.Ctx) error {
 	if c.Method() == fiber.MethodPost {
 		var req dto.LoginRequest
@@ -94,6 +117,13 @@ func (uc *UserController) Login(c *fiber.Ctx) error {
 	return handler(c)
 }
 
+// Logout godoc
+//
+//	@Summary		Logout
+//	@Description	Logout user
+//	@Tags			user
+//
+//	@Router			/user/logout [get]
 func (uc *UserController) Logout(c *fiber.Ctx) error {
 	sess, _ := uc.store.Get(c)
 	if err := sess.Destroy(); err != nil {
@@ -102,6 +132,18 @@ func (uc *UserController) Logout(c *fiber.Ctx) error {
 	return c.Redirect("/user/login")
 }
 
+// EditUser godoc
+//
+//	@Summary		Edit User
+//	@Description	Edit user
+//	@Tags			user
+//
+// Accept json
+// Produce json
+//
+//	@Param			id		path	int						true	"User ID"
+//	@Param			request	body	dto.UpdateUserRequest	true	"Edit User Request"
+//	@Router			/user/:id [put]
 func (uc *UserController) EditUser(c *fiber.Ctx) error {
 	var userID int
 	sess, _ := uc.store.Get(c)
@@ -160,6 +202,18 @@ func (uc *UserController) EditUser(c *fiber.Ctx) error {
 	return handler(c)
 }
 
+// EditPassword godoc
+//
+//	@Summary		Edit Password
+//	@Description	Edit password
+//	@Tags			user
+//
+// Accept json
+// Produce json
+//
+//	@Param			id		path	int							true	"User ID"
+//	@Param			request	body	dto.UpdatePasswordRequest	true	"Edit Password Request"
+//	@Router			/user/password/:id [put]
 func (uc *UserController) EditPassword(c *fiber.Ctx) error {
 	var userID int
 	sess, _ := uc.store.Get(c)
