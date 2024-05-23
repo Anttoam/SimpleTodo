@@ -30,7 +30,7 @@ func (r *TodoRepository) FindAll(ctx context.Context, userID int) ([]*domain.Tod
 	}
 	defer func() {
 		if err := rows.Close(); err != nil {
-			log.Fatal(err)
+			log.Printf("failed to close rows: %v", err)
 		}
 	}()
 
