@@ -21,4 +21,10 @@ atlas-apply:
 migrate:
 	atlas schema apply -u "${TURSO_DB_URL}?authToken=${TURSO_DB_TOKEN}" --to sqlite://migration/todo.db
 
-.PHONY: db-shall check-code redis atlas-inspect atlas-apply migrate
+mockuu:
+	mockgen -source internal/usecase/user_usecase.go -destination internal/usecase/mock/userUsecase.go
+
+mocktu:
+	mockgen -source internal/usecase/todo_usecase.go -destination internal/usecase/mock/todoUsecase.go
+
+.PHONY: db-shall check-code redis atlas-inspect atlas-apply migrate mockuu mocktu
