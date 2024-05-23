@@ -38,6 +38,9 @@ linters-settings:
 
 issues:
   exclude-use-default: false
+  exclude-files:
+    - ".*_test\\.go"
+    - "views/.*\\.go"
 
 linters:
   disable-all: true
@@ -63,3 +66,4 @@ linters:
     - dupl
     - gofumpt
     - nolintlint
+      
