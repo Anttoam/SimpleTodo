@@ -27,4 +27,8 @@ mockuu:
 mocktu:
 	mockgen -source internal/usecase/todo_usecase.go -destination internal/usecase/mock/todoUsecase.go
 
+swag:
+	swag init -g cmd/main.go
+	swag fmt
+
 .PHONY: db-shall check-code redis atlas-inspect atlas-apply migrate mockuu mocktu
