@@ -3,63 +3,47 @@ package controller
 import (
 	"context"
 	"errors"
-	"log"
+	"net/http"
 	"strconv"
 
 	"github.com/Anttoam/golang-htmx-todos/views/todo"
 	"github.com/a-h/templ"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/adaptor"
+	"github.com/labstack/echo/v4"
 )
 
-func parseAndHandleError(c *fiber.Ctx, req interface{}) error {
-	if err := c.BodyParser(req); err != nil {
-		return handleError(c, err, fiber.StatusBadRequest)
-	}
-
-	return nil
-}
-
-func handleError(c *fiber.Ctx, err error, statusCode int) error {
-	log.Println(err)
-	return c.Status(statusCode).JSON(fiber.Map{
-		"error": err.Error(),
-	})
-}
-
-func (t *TodoController) changeStatus(c *fiber.Ctx, changeFunc func(ctx context.Context, todoID int) error) error {
-	idP, err := strconv.Atoi(c.Params("id"))
+func (t *TodoController) changeStatus(c echo.Context, changeFunc func(ctx context.Context, todoID int) error) error {
+	idP, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return handleError(c, err, fiber.StatusNotFound)
+		return c.JSON(http.StatusNotFound, err.Error())
 	}
 
-	sess, _ := t.store.Get(c)
-	id := sess.Get("id")
+	sess, _ := t.store.Get(c.Request(), "session_id")
+	id := sess.Values["id"]
 	if id == nil {
-		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
 	userID := id.(int)
 
-	ctx := c.Context()
+	ctx := c.Request().Context()
 	fetch, err := t.tu.FindByID(ctx, idP)
 	if err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	if fetch.Todo.UserID != userID {
-		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
 
 	if err := changeFunc(ctx, idP); err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	res, err := t.tu.FindAll(ctx, userID)
 	if err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	component := todo.List(*res)
-	handler := adaptor.HTTPHandler(templ.Handler(component))
+	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
