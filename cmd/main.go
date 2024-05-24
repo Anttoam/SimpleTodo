@@ -1,21 +1,23 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
-	"time"
 
 	"github.com/Anttoam/golang-htmx-todos/config"
 	"github.com/Anttoam/golang-htmx-todos/internal/controller"
 	"github.com/Anttoam/golang-htmx-todos/internal/repository"
 	"github.com/Anttoam/golang-htmx-todos/internal/usecase"
-	"github.com/Anttoam/golang-htmx-todos/pkg/storage"
 	"github.com/Anttoam/golang-htmx-todos/pkg/turso"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/gofiber/fiber/v2/middleware/session"
-	fiberSwagger "github.com/swaggo/fiber-swagger"
+	"github.com/Anttoam/golang-htmx-todos/pkg/validation"
+	"github.com/go-playground/validator"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/rbcervilla/redisstore/v9"
+	"github.com/redis/go-redis/v9"
+	echoSwagger "github.com/swaggo/echo-swagger"
 
 	_ "github.com/Anttoam/golang-htmx-todos/docs"
 )
@@ -46,26 +48,33 @@ func main() {
 	todoRepository := repository.NewTodoRepository(db)
 	todoUsecase := usecase.NewTodoUsecase(todoRepository)
 
-	app := fiber.New()
-	app.Use(logger.New())
-	app.Use(recover.New())
-	app.Get("/swagger/*", fiberSwagger.WrapHandler)
+	e := echo.New()
+	e.Validator = &validation.CustomValidator{Validator: validator.New()}
+	e.Use(middleware.Recover())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "time=${time_rfc3339_nano}, method=${method}, uri=${uri}, status=${status}\n",
+	}))
 
-	redis := storage.NewRedisClient(cfg)
-	store := session.New(session.Config{
-		Storage:      redis,
-		Expiration:   12 * time.Hour,
-		KeyLookup:    "cookie:session_id",
-		CookiePath:   "/",
-		CookieDomain: "localhost",
-		// CookieSecure: true,
-		CookieHTTPOnly: true,
-		CookieSameSite: "Strict",
+	client := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%s:%d", cfg.Redis.Host, cfg.Redis.Port),
 	})
-	app.Static("/dist", "./dist")
-	controller.NewUserController(app, userUsecase, store)
+	store, err := redisstore.NewRedisStore(context.Background(), client)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	store.KeyPrefix("session_")
+	store.Options(sessions.Options{
+		Path:     "/",
+		Domain:   "localhost",
+		MaxAge:   43200, // 12 hours
+		HttpOnly: true,
+		// Secure:   true,
+	})
+	e.Static("/dist", "./dist")
+	controller.NewUserController(e, userUsecase, store)
 
-	controller.NewTodoController(app, todoUsecase, store)
+	controller.NewTodoController(e, todoUsecase, store)
 
-	log.Fatal(app.Listen(":8080"))
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	e.Logger.Fatal(e.Start(":8080"))
 }
