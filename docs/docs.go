@@ -134,6 +134,10 @@ const docTemplate = `{
     "definitions": {
         "dto.LoginRequest": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -145,29 +149,43 @@ const docTemplate = `{
         },
         "dto.SignUpRequest": {
             "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 2
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 6
                 }
             }
         },
         "dto.UpdatePasswordRequest": {
             "type": "object",
+            "required": [
+                "id",
+                "new_password",
+                "password"
+            ],
             "properties": {
                 "id": {
                     "type": "integer"
                 },
                 "new_password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 6
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 6
                 },
                 "updated_at": {
                     "type": "string"
@@ -176,6 +194,9 @@ const docTemplate = `{
         },
         "dto.UpdateUserRequest": {
             "type": "object",
+            "required": [
+                "id"
+            ],
             "properties": {
                 "email": {
                     "type": "string"

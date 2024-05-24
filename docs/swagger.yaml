@@ -5,26 +5,41 @@ definitions:
         type: string
       password:
         type: string
+    required:
+    - email
+    - password
     type: object
   dto.SignUpRequest:
     properties:
       email:
         type: string
       name:
+        minLength: 2
         type: string
       password:
+        minLength: 6
         type: string
+    required:
+    - email
+    - name
+    - password
     type: object
   dto.UpdatePasswordRequest:
     properties:
       id:
         type: integer
       new_password:
+        minLength: 6
         type: string
       password:
+        minLength: 6
         type: string
       updated_at:
         type: string
+    required:
+    - id
+    - new_password
+    - password
     type: object
   dto.UpdateUserRequest:
     properties:
@@ -36,6 +51,8 @@ definitions:
         type: string
       updated_at:
         type: string
+    required:
+    - id
     type: object
 info:
   contact: {}
