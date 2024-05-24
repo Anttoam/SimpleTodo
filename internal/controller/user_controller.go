@@ -3,20 +3,22 @@ package controller
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
+	"net/http"
 	"strconv"
 
 	"github.com/Anttoam/golang-htmx-todos/dto"
 	"github.com/Anttoam/golang-htmx-todos/views/todo"
 	"github.com/Anttoam/golang-htmx-todos/views/user"
 	"github.com/a-h/templ"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/adaptor"
-	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/labstack/echo/v4"
+	"github.com/rbcervilla/redisstore/v9"
 )
 
 type UserUsecase interface {
-	SignUp(ctx context.Context, user dto.SignUpRequest) error
-	Login(ctx context.Context, user dto.LoginRequest) (*dto.LoginResponse, error)
+	SignUp(ctx context.Context, req dto.SignUpRequest) error
+	Login(ctx context.Context, req dto.LoginRequest) (*dto.LoginResponse, error)
 	FindUserByID(ctx context.Context, userID int) (*dto.FindByIDUserResponse, error)
 	EditUser(ctx context.Context, user dto.UpdateUserRequest) error
 	EditPassword(ctx context.Context, user dto.UpdatePasswordRequest) error
@@ -24,22 +26,22 @@ type UserUsecase interface {
 
 type UserController struct {
 	uu    UserUsecase
-	store *session.Store
+	store *redisstore.RedisStore
 }
 
-func NewUserController(app *fiber.App, uu UserUsecase, store *session.Store) {
+func NewUserController(e *echo.Echo, uu UserUsecase, store *redisstore.RedisStore) {
 	uc := &UserController{uu: uu, store: store}
 
-	api := app.Group("/user")
-	api.Get("/signup", uc.SignUp)
-	api.Post("/signup", uc.SignUp)
-	api.Get("/login", uc.Login)
-	api.Post("/login", uc.Login)
-	api.Get("/logout", uc.Logout)
-	api.Get("/:id", uc.EditUser)
-	api.Put("/:id", uc.EditUser)
-	api.Get("/password/:id", uc.EditPassword)
-	api.Put("/password/:id", uc.EditPassword)
+	api := e.Group("/user")
+	api.GET("/signup", uc.SignUp)
+	api.POST("/signup", uc.SignUp)
+	api.GET("/login", uc.Login)
+	api.POST("/login", uc.Login)
+	api.GET("/logout", uc.Logout)
+	api.GET("/:id", uc.EditUser)
+	api.PUT("/:id", uc.EditUser)
+	api.GET("/password/:id", uc.EditPassword)
+	api.PUT("/password/:id", uc.EditPassword)
 }
 
 // Signup godoc
@@ -54,28 +56,33 @@ func NewUserController(app *fiber.App, uu UserUsecase, store *session.Store) {
 //	@Param			request	body		dto.SignUpRequest	true	"Create User Request"
 //	@Success		200		{string}	string				"ok"
 //	@Router			/user/signup [post]
-func (uc *UserController) SignUp(c *fiber.Ctx) error {
-	if c.Method() == fiber.MethodPost {
+func (uc *UserController) SignUp(c echo.Context) error {
+	if c.Request().Method == http.MethodPost {
 		req := dto.SignUpRequest{
 			Name:     c.FormValue("name"),
 			Email:    c.FormValue("email"),
 			Password: c.FormValue("password"),
 		}
-		if err := parseAndHandleError(c, &req); err != nil {
-			return err
+
+		if err := c.Bind(&req); err != nil {
+			fmt.Println("Bind error: ", err)
+			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		ctx := c.Context()
+		if err := c.Validate(req); err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+
+		ctx := c.Request().Context()
 		if err := uc.uu.SignUp(ctx, req); err != nil {
-			return handleError(c, err, fiber.StatusInternalServerError)
+			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.Redirect("/user/login")
-
+		return c.Redirect(http.StatusSeeOther, "/user/login")
 	}
 
-	component := templ.Handler(user.SignUp())
-	handler := adaptor.HTTPHandler(component)
+	component := user.SignUp()
+	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
 
@@ -90,30 +97,34 @@ func (uc *UserController) SignUp(c *fiber.Ctx) error {
 //
 //	@Param			request	body	dto.LoginRequest	true	"Login Request"
 //	@Router			/user/login [post]
-func (uc *UserController) Login(c *fiber.Ctx) error {
-	if c.Method() == fiber.MethodPost {
-		var req dto.LoginRequest
-		if err := parseAndHandleError(c, &req); err != nil {
-			return err
+func (uc *UserController) Login(c echo.Context) error {
+	if c.Request().Method == http.MethodPost {
+		req := dto.LoginRequest{
+			Email:    c.FormValue("email"),
+			Password: c.FormValue("password"),
+		}
+		if err := c.Bind(&req); err != nil {
+			log.Println("Bind error: ", err)
+			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		ctx := c.Context()
+		ctx := c.Request().Context()
 		res, err := uc.uu.Login(ctx, req)
 		if err != nil {
-			return handleError(c, err, fiber.StatusInternalServerError)
+			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		sess, _ := uc.store.Get(c)
-		sess.Set("id", res.ID)
-		if err := sess.Save(); err != nil {
-			return handleError(c, err, fiber.StatusInternalServerError)
+		sess, _ := uc.store.Get(c.Request(), "session_id")
+		sess.Values["id"] = res.ID
+		if err := sess.Save(c.Request(), c.Response()); err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.Redirect("/todos")
+		return c.Redirect(http.StatusSeeOther, "/todos")
 	}
 
-	component := templ.Handler(user.Login())
-	handler := adaptor.HTTPHandler(component)
+	component := user.Login()
+	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
 
@@ -124,12 +135,14 @@ func (uc *UserController) Login(c *fiber.Ctx) error {
 //	@Tags			user
 //
 //	@Router			/user/logout [get]
-func (uc *UserController) Logout(c *fiber.Ctx) error {
-	sess, _ := uc.store.Get(c)
-	if err := sess.Destroy(); err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+func (uc *UserController) Logout(c echo.Context) error {
+	sess, _ := uc.store.Get(c.Request(), "session_id")
+	sess.Values["id"] = nil
+	sess.Options.MaxAge = -1
+	if err := sess.Save(c.Request(), c.Response()); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return c.Redirect("/user/login")
+	return c.Redirect(http.StatusFound, "/user/login")
 }
 
 // EditUser godoc
@@ -144,61 +157,70 @@ func (uc *UserController) Logout(c *fiber.Ctx) error {
 //	@Param			id		path	int						true	"User ID"
 //	@Param			request	body	dto.UpdateUserRequest	true	"Edit User Request"
 //	@Router			/user/:id [put]
-func (uc *UserController) EditUser(c *fiber.Ctx) error {
+func (uc *UserController) EditUser(c echo.Context) error {
 	var userID int
-	sess, _ := uc.store.Get(c)
-	id := sess.Get("id")
+	sess, _ := uc.store.Get(c.Request(), "session_id")
+	id := sess.Values["id"]
 	if id == nil {
-		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
 	userID = id.(int)
 
 	var fetch *dto.FindByIDUserResponse
 
-	if c.Method() == fiber.MethodPut {
-		var req dto.UpdateUserRequest
-		if err := parseAndHandleError(c, &req); err != nil {
-			return err
+	if c.Request().Method == http.MethodPut {
+		req := dto.UpdateUserRequest{
+			Name:  c.FormValue("name"),
+			Email: c.FormValue("email"),
+		}
+		if err := c.Bind(&req); err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		sess, _ := uc.store.Get(c)
-		id := sess.Get("id")
+		sess, _ := uc.store.Get(c.Request(), "session_id")
+		id := sess.Values["id"]
 		if id == nil {
-			return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+			return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 		}
 		userID := id.(int)
 
-		idP, err := strconv.Atoi(c.Params("id"))
+		idP, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			return handleError(c, err, fiber.StatusNotFound)
+			return c.JSON(http.StatusNotFound, err.Error())
 		}
 
 		req.ID = idP
 
-		ctx := c.Context()
+		if err := c.Validate(req); err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+
+		ctx := c.Request().Context()
 		fetch, err := uc.uu.FindUserByID(ctx, req.ID)
 		if err != nil {
-			return handleError(c, err, fiber.StatusInternalServerError)
+			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
 		if fetch.User.ID != userID {
-			return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+			return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 		}
 
 		if err := uc.uu.EditUser(ctx, req); err != nil {
-			return handleError(c, err, fiber.StatusInternalServerError)
+			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
+		return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/user/%d", fetch.User.ID))
+
 	}
 
-	ctx := c.Context()
+	ctx := c.Request().Context()
 	fetch, err := uc.uu.FindUserByID(ctx, userID)
 	if err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	component := templ.Handler(todo.EditUser(strconv.Itoa(userID), fetch.User.Name, fetch.User.Email))
-	handler := adaptor.HTTPHandler(component)
+	component := todo.EditUser(strconv.Itoa(userID), fetch.User.Name, fetch.User.Email)
+	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
 
@@ -214,55 +236,59 @@ func (uc *UserController) EditUser(c *fiber.Ctx) error {
 //	@Param			id		path	int							true	"User ID"
 //	@Param			request	body	dto.UpdatePasswordRequest	true	"Edit Password Request"
 //	@Router			/user/password/:id [put]
-func (uc *UserController) EditPassword(c *fiber.Ctx) error {
+func (uc *UserController) EditPassword(c echo.Context) error {
 	var userID int
-	sess, _ := uc.store.Get(c)
-	id := sess.Get("id")
+	sess, _ := uc.store.Get(c.Request(), "session_id")
+	id := sess.Values["id"]
 	if id == nil {
-		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
 	userID = id.(int)
 
-	if c.Method() == fiber.MethodPut {
-		var req dto.UpdatePasswordRequest
-		if err := parseAndHandleError(c, &req); err != nil {
+	if c.Request().Method == http.MethodPut {
+		req := dto.UpdatePasswordRequest{
+			Password:    c.FormValue("password"),
+			NewPassword: c.FormValue("new_password"),
+		}
+		if err := c.Bind(&req); err != nil {
 			return err
 		}
 
-		sess, _ := uc.store.Get(c)
-		id := sess.Get("id")
+		sess, _ := uc.store.Get(c.Request(), "session_id")
+		id := sess.Values["id"]
 		if id == nil {
-			return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+			return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 		}
 		userID := id.(int)
 
-		idP, err := strconv.Atoi(c.Params("id"))
+		idP, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			return handleError(c, err, fiber.StatusNotFound)
+			return c.JSON(http.StatusNotFound, err.Error())
 		}
 
 		req.ID = idP
 
-		ctx := c.Context()
-		fetch, err := uc.uu.FindUserByID(ctx, req.ID)
-		if err != nil {
-			return handleError(c, err, fiber.StatusInternalServerError)
+		if err := c.Validate(req); err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		req.Password = c.FormValue("password")
-		req.NewPassword = c.FormValue("new_password")
+		ctx := c.Request().Context()
+		fetch, err := uc.uu.FindUserByID(ctx, req.ID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
 
 		if fetch.User.ID != userID {
-			return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+			return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 		}
 
 		if err := uc.uu.EditPassword(ctx, req); err != nil {
-			return handleError(c, err, fiber.StatusInternalServerError)
+			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
 	}
 
-	component := templ.Handler(todo.EditPassword(strconv.Itoa(userID)))
-	handler := adaptor.HTTPHandler(component)
+	component := todo.EditPassword(strconv.Itoa(userID))
+	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }

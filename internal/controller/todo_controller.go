@@ -3,14 +3,14 @@ package controller
 import (
 	"context"
 	"errors"
+	"net/http"
 	"strconv"
 
 	"github.com/Anttoam/golang-htmx-todos/dto"
 	"github.com/Anttoam/golang-htmx-todos/views/todo"
 	"github.com/a-h/templ"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/adaptor"
-	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/labstack/echo/v4"
+	"github.com/rbcervilla/redisstore/v9"
 )
 
 type TodoUsecase interface {
@@ -25,175 +25,189 @@ type TodoUsecase interface {
 
 type TodoController struct {
 	tu    TodoUsecase
-	store *session.Store
+	store *redisstore.RedisStore
 }
 
-func NewTodoController(app *fiber.App, tu TodoUsecase, store *session.Store) {
+func NewTodoController(app *echo.Echo, tu TodoUsecase, store *redisstore.RedisStore) {
 	t := &TodoController{tu: tu, store: store}
 
-	app.Get("/create", t.Create)
-	app.Post("/create", t.Create)
-	app.Get("/todos", t.FindAll)
-	app.Get("/:id", t.FindByID)
-	app.Put("/:id", t.Update)
-	app.Delete("/:id", t.Delete)
-	app.Put("/done/:id", t.IsDone)
-	app.Put("/notdone/:id", t.IsNotDone)
+	app.GET("/create", t.Create)
+	app.POST("/create", t.Create)
+	app.GET("/todos", t.FindAll)
+	app.GET("/:id", t.FindByID)
+	app.PUT("/:id", t.Update)
+	app.DELETE("/:id", t.Delete)
+	app.PUT("/done/:id", t.IsDone)
+	app.PUT("/notdone/:id", t.IsNotDone)
 }
 
-func (t *TodoController) Create(c *fiber.Ctx) error {
-	sess, _ := t.store.Get(c)
-	id := sess.Get("id")
+func (t *TodoController) Create(c echo.Context) error {
+	sess, _ := t.store.Get(c.Request(), "session_id")
+	id := sess.Values["id"]
 	if id == nil {
-		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
 
-	if c.Method() == fiber.MethodPost {
-		var req dto.CreateTodoRequest
-		if err := parseAndHandleError(c, &req); err != nil {
+	if c.Request().Method == http.MethodPost {
+		req := dto.CreateTodoRequest{
+			Title:       c.FormValue("title"),
+			Description: c.FormValue("description"),
+		}
+		if err := c.Bind(&req); err != nil {
 			return err
 		}
 
 		req.UserID = id.(int)
 
-		ctx := c.Context()
-		if err := t.tu.Create(ctx, req); err != nil {
-			return handleError(c, err, fiber.StatusInternalServerError)
+		if err := c.Validate(req); err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		return c.Redirect("/todos")
+		ctx := c.Request().Context()
+		if err := t.tu.Create(ctx, req); err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/todos")
 	}
 
 	component := todo.Create()
-	handler := adaptor.HTTPHandler(templ.Handler(component))
+	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
 
-func (t *TodoController) FindAll(c *fiber.Ctx) error {
-	sess, _ := t.store.Get(c)
-	id := sess.Get("id")
+func (t *TodoController) FindAll(c echo.Context) error {
+	sess, _ := t.store.Get(c.Request(), "session_id")
+	id := sess.Values["id"]
 	if id == nil {
-		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
 
-	ctx := c.Context()
+	ctx := c.Request().Context()
 	userID := id.(int)
 	res, err := t.tu.FindAll(ctx, userID)
 	if err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	component := todo.Page(*res, strconv.Itoa(userID))
-	handler := adaptor.HTTPHandler(templ.Handler(component))
+	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
 
-func (t *TodoController) FindByID(c *fiber.Ctx) error {
-	sess, _ := t.store.Get(c)
-	id := sess.Get("id")
+func (t *TodoController) FindByID(c echo.Context) error {
+	sess, _ := t.store.Get(c.Request(), "session_id")
+	id := sess.Values["id"]
 	if id == nil {
-		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
 
-	idP, err := strconv.Atoi(c.Params("id"))
+	idP, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return handleError(c, err, fiber.StatusNotFound)
+		return c.JSON(http.StatusNotFound, err.Error())
 	}
 
 	todoID := idP
 
-	ctx := c.Context()
+	ctx := c.Request().Context()
 	res, err := t.tu.FindByID(ctx, todoID)
 	if err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	if res.Todo.UserID != id.(int) {
-		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
 
 	component := todo.EditForm(strconv.Itoa(res.Todo.ID), res.Todo.Title, res.Todo.Description)
-	handler := adaptor.HTTPHandler(templ.Handler(component))
+	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
 
-func (t *TodoController) Update(c *fiber.Ctx) error {
-	var req dto.UpdateTodoRequest
-	if err := parseAndHandleError(c, &req); err != nil {
+func (t *TodoController) Update(c echo.Context) error {
+	req := dto.UpdateTodoRequest{
+		Title:       c.FormValue("title"),
+		Description: c.FormValue("description"),
+	}
+	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
-	sess, _ := t.store.Get(c)
-	id := sess.Get("id")
+	sess, _ := t.store.Get(c.Request(), "session_id")
+	id := sess.Values["id"]
 	if id == nil {
-		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
 	userID := id.(int)
 
-	idP, err := strconv.Atoi(c.Params("id"))
+	idP, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return handleError(c, err, fiber.StatusNotFound)
+		return c.JSON(http.StatusNotFound, err.Error())
 	}
 
 	req.ID = idP
 
-	ctx := c.Context()
+	if err := c.Validate(req); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	ctx := c.Request().Context()
 	fetch, err := t.tu.FindByID(ctx, req.ID)
 	if err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	if fetch.Todo.UserID != userID {
-		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
 	if err := t.tu.Update(ctx, req); err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	res, err := t.tu.FindAll(ctx, userID)
 	if err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	component := todo.List(*res)
-	handler := adaptor.HTTPHandler(templ.Handler(component))
+	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
 
-func (t *TodoController) Delete(c *fiber.Ctx) error {
-	sess, _ := t.store.Get(c)
-	id := sess.Get("id")
+func (t *TodoController) Delete(c echo.Context) error {
+	sess, _ := t.store.Get(c.Request(), "session_id")
+	id := sess.Values["id"]
 	if id == nil {
-		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
 
-	idP, err := strconv.Atoi(c.Params("id"))
+	idP, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return handleError(c, err, fiber.StatusNotFound)
+		return c.JSON(http.StatusNotFound, err.Error())
 	}
 
-	ctx := c.Context()
+	ctx := c.Request().Context()
 	res, err := t.tu.FindByID(ctx, idP)
 	if err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	if res.Todo.UserID != id.(int) {
-		return handleError(c, errors.New("Unauthorized"), fiber.StatusUnauthorized)
+		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
 
 	if err := t.tu.Delete(ctx, res.Todo.ID); err != nil {
-		return handleError(c, err, fiber.StatusInternalServerError)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	component := todo.Delete(strconv.Itoa(res.Todo.ID))
-	handler := adaptor.HTTPHandler(templ.Handler(component))
+	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
 
-func (t *TodoController) IsDone(c *fiber.Ctx) error {
+func (t *TodoController) IsDone(c echo.Context) error {
 	return t.changeStatus(c, t.tu.IsDone)
 }
 
-func (t *TodoController) IsNotDone(c *fiber.Ctx) error {
+func (t *TodoController) IsNotDone(c echo.Context) error {
 	return t.changeStatus(c, t.tu.IsNotDone)
 }
