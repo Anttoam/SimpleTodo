@@ -6,16 +6,16 @@ import (
 
 	"github.com/Anttoam/golang-htmx-todos/domain"
 	"github.com/Anttoam/golang-htmx-todos/dto"
-	mock_usecase "github.com/Anttoam/golang-htmx-todos/internal/usecase/mock"
-	"github.com/golang/mock/gomock"
+	mock_repository "github.com/Anttoam/golang-htmx-todos/internal/usecase/mock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 func TestTodoCreate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	tr := mock_usecase.NewMockTodoRepository(ctrl)
+	tr := mock_repository.NewMockTodoRepository(ctrl)
 	tu := NewTodoUsecase(tr)
 
 	ctx := context.Background()
@@ -38,7 +38,7 @@ func TestTodoFindAll(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	tr := mock_usecase.NewMockTodoRepository(ctrl)
+	tr := mock_repository.NewMockTodoRepository(ctrl)
 	tu := NewTodoUsecase(tr)
 
 	ctx := context.Background()
@@ -70,7 +70,7 @@ func TestTodoFindByID(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	tr := mock_usecase.NewMockTodoRepository(ctrl)
+	tr := mock_repository.NewMockTodoRepository(ctrl)
 	tu := NewTodoUsecase(tr)
 
 	ctx := context.Background()
@@ -93,7 +93,7 @@ func TestTodoUpdate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	tr := mock_usecase.NewMockTodoRepository(ctrl)
+	tr := mock_repository.NewMockTodoRepository(ctrl)
 	tu := NewTodoUsecase(tr)
 
 	ctx := context.Background()
@@ -115,7 +115,7 @@ func TestTodoDelete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	tr := mock_usecase.NewMockTodoRepository(ctrl)
+	tr := mock_repository.NewMockTodoRepository(ctrl)
 	tu := NewTodoUsecase(tr)
 
 	ctx := context.Background()
@@ -131,7 +131,7 @@ func TestTodoIsDone(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	tr := mock_usecase.NewMockTodoRepository(ctrl)
+	tr := mock_repository.NewMockTodoRepository(ctrl)
 	tu := NewTodoUsecase(tr)
 
 	ctx := context.Background()
@@ -147,7 +147,7 @@ func TestTodoIsNotDone(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	tr := mock_usecase.NewMockTodoRepository(ctrl)
+	tr := mock_repository.NewMockTodoRepository(ctrl)
 	tu := NewTodoUsecase(tr)
 
 	ctx := context.Background()

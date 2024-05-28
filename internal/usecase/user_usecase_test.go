@@ -7,17 +7,17 @@ import (
 
 	"github.com/Anttoam/golang-htmx-todos/domain"
 	"github.com/Anttoam/golang-htmx-todos/dto"
-	mock_usecase "github.com/Anttoam/golang-htmx-todos/internal/usecase/mock"
-	"github.com/golang/mock/gomock"
+	mock_repository "github.com/Anttoam/golang-htmx-todos/internal/usecase/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 func TestSignUp(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	ur := mock_usecase.NewMockUserRepository(ctrl)
+	ur := mock_repository.NewMockUserRepository(ctrl)
 	uu := NewUserUsecase(ur)
 
 	req := dto.SignUpRequest{
@@ -40,7 +40,7 @@ func TestLogin(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	ur := mock_usecase.NewMockUserRepository(ctrl)
+	ur := mock_repository.NewMockUserRepository(ctrl)
 	uu := NewUserUsecase(ur)
 
 	req := &dto.LoginRequest{
@@ -69,7 +69,7 @@ func TestFindUserByID(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	ur := mock_usecase.NewMockUserRepository(ctrl)
+	ur := mock_repository.NewMockUserRepository(ctrl)
 	uu := NewUserUsecase(ur)
 
 	ctx := context.Background()
@@ -95,7 +95,7 @@ func TestEditUser(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	ur := mock_usecase.NewMockUserRepository(ctrl)
+	ur := mock_repository.NewMockUserRepository(ctrl)
 	uu := NewUserUsecase(ur)
 
 	ctx := context.Background()
@@ -127,7 +127,7 @@ func TestEditPassword(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	ur := mock_usecase.NewMockUserRepository(ctrl)
+	ur := mock_repository.NewMockUserRepository(ctrl)
 	uu := NewUserUsecase(ur)
 
 	ctx := context.Background()
