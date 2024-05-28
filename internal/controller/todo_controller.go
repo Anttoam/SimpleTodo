@@ -69,7 +69,7 @@ func (t *TodoController) Create(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.Redirect(http.StatusSeeOther, "/todos")
+		return c.Redirect(http.StatusSeeOther, "/todo/")
 	}
 
 	component := todo.Create()

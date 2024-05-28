@@ -120,7 +120,7 @@ func (uc *UserController) Login(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.Redirect(http.StatusSeeOther, "/todos")
+		return c.Redirect(http.StatusSeeOther, "/todo/")
 	}
 
 	component := user.Login()

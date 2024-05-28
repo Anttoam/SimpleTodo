@@ -13,9 +13,9 @@ templ List(res dto.FindAllTodoResponse) {
 				<div id={ fmt.Sprintf("todo-%s", strconv.Itoa(todo.ID)) } x-data="{ open: false }" class="flex justify-between items-center border-b border-gray-300 py-2">
 					<div class="flex items-center space-x-3">
 						if todo.Done == true {
-							<input type="checkbox" checked hx-put={ fmt.Sprintf("/notdone/%s", strconv.Itoa(todo.ID)) } hx-target="#row" hx-swap="outerHTML" class="h-6 w-6"/>
+							<input type="checkbox" checked hx-put={ fmt.Sprintf("/todo/notdone/%s", strconv.Itoa(todo.ID)) } hx-target="#row" hx-swap="outerHTML" class="h-6 w-6"/>
 						} else {
-							<input type="checkbox" hx-put={ fmt.Sprintf("/done/%s", strconv.Itoa(todo.ID)) } hx-target="#row" hx-swap="outerHTML" class="h-6 w-6"/>
+							<input type="checkbox" hx-put={ fmt.Sprintf("/todo/done/%s", strconv.Itoa(todo.ID)) } hx-target="#row" hx-swap="outerHTML" class="h-6 w-6"/>
 						}
 						<div class="flex-1 pr-8 ml-4">
 							<h3 class="text-lg font-semibold">{ todo.Title }</h3>
