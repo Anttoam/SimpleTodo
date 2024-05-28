@@ -28,17 +28,18 @@ type TodoController struct {
 	store *redisstore.RedisStore
 }
 
-func NewTodoController(app *echo.Echo, tu TodoUsecase, store *redisstore.RedisStore) {
+func NewTodoController(e *echo.Echo, tu TodoUsecase, store *redisstore.RedisStore) {
 	t := &TodoController{tu: tu, store: store}
 
-	app.GET("/create", t.Create)
-	app.POST("/create", t.Create)
-	app.GET("/todos", t.FindAll)
-	app.GET("/:id", t.FindByID)
-	app.PUT("/:id", t.Update)
-	app.DELETE("/:id", t.Delete)
-	app.PUT("/done/:id", t.IsDone)
-	app.PUT("/notdone/:id", t.IsNotDone)
+	api := e.Group("/todo")
+	api.GET("/create", t.Create)
+	api.POST("/create", t.Create)
+	api.GET("/todos", t.FindAll)
+	api.GET("/:id", t.FindByID)
+	api.PUT("/:id", t.Update)
+	api.DELETE("/:id", t.Delete)
+	api.PUT("/done/:id", t.IsDone)
+	api.PUT("/notdone/:id", t.IsNotDone)
 }
 
 func (t *TodoController) Create(c echo.Context) error {
