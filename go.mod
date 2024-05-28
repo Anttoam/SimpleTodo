@@ -6,7 +6,6 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/a-h/templ v0.2.680
 	github.com/go-playground/validator v9.31.0+incompatible
-	github.com/gofiber/storage/redis/v3 v3.1.1
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/sessions v1.2.0
 	github.com/labstack/echo/v4 v4.12.0
@@ -17,6 +16,7 @@ require (
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.3
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240416075003-747366ff79c4
+	go.uber.org/mock v0.4.0
 	golang.org/x/crypto v0.23.0
 )
 
