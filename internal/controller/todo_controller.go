@@ -34,7 +34,7 @@ func NewTodoController(e *echo.Echo, tu TodoUsecase, store *redisstore.RedisStor
 	api := e.Group("/todo")
 	api.GET("/create", t.Create)
 	api.POST("/create", t.Create)
-	api.GET("/todos", t.FindAll)
+	api.GET("/", t.FindAll)
 	api.GET("/:id", t.FindByID)
 	api.PUT("/:id", t.Update)
 	api.DELETE("/:id", t.Delete)
