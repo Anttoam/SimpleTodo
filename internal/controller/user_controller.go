@@ -25,12 +25,12 @@ type UserUsecase interface {
 }
 
 type UserController struct {
-	uu    UserUsecase
-	store *redisstore.RedisStore
+	Usecase UserUsecase
+	Store   *redisstore.RedisStore
 }
 
 func NewUserController(e *echo.Echo, uu UserUsecase, store *redisstore.RedisStore) {
-	uc := &UserController{uu: uu, store: store}
+	uc := &UserController{Usecase: uu, Store: store}
 
 	api := e.Group("/user")
 	api.GET("/signup", uc.SignUp)
@@ -65,7 +65,6 @@ func (uc *UserController) SignUp(c echo.Context) error {
 		}
 
 		if err := c.Bind(&req); err != nil {
-			fmt.Println("Bind error: ", err)
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
@@ -74,7 +73,7 @@ func (uc *UserController) SignUp(c echo.Context) error {
 		}
 
 		ctx := c.Request().Context()
-		if err := uc.uu.SignUp(ctx, req); err != nil {
+		if err := uc.Usecase.SignUp(ctx, req); err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
@@ -109,12 +108,12 @@ func (uc *UserController) Login(c echo.Context) error {
 		}
 
 		ctx := c.Request().Context()
-		res, err := uc.uu.Login(ctx, req)
+		res, err := uc.Usecase.Login(ctx, req)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		sess, _ := uc.store.Get(c.Request(), "session_id")
+		sess, _ := uc.Store.Get(c.Request(), "session_id")
 		sess.Values["id"] = res.ID
 		if err := sess.Save(c.Request(), c.Response()); err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
@@ -136,7 +135,7 @@ func (uc *UserController) Login(c echo.Context) error {
 //
 //	@Router			/user/logout [get]
 func (uc *UserController) Logout(c echo.Context) error {
-	sess, _ := uc.store.Get(c.Request(), "session_id")
+	sess, _ := uc.Store.Get(c.Request(), "session_id")
 	sess.Values["id"] = nil
 	sess.Options.MaxAge = -1
 	if err := sess.Save(c.Request(), c.Response()); err != nil {
@@ -159,7 +158,7 @@ func (uc *UserController) Logout(c echo.Context) error {
 //	@Router			/user/:id [put]
 func (uc *UserController) EditUser(c echo.Context) error {
 	var userID int
-	sess, _ := uc.store.Get(c.Request(), "session_id")
+	sess, _ := uc.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
 		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
@@ -177,7 +176,7 @@ func (uc *UserController) EditUser(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		sess, _ := uc.store.Get(c.Request(), "session_id")
+		sess, _ := uc.Store.Get(c.Request(), "session_id")
 		id := sess.Values["id"]
 		if id == nil {
 			return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
@@ -196,7 +195,7 @@ func (uc *UserController) EditUser(c echo.Context) error {
 		}
 
 		ctx := c.Request().Context()
-		fetch, err := uc.uu.FindUserByID(ctx, req.ID)
+		fetch, err := uc.Usecase.FindUserByID(ctx, req.ID)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
@@ -205,7 +204,7 @@ func (uc *UserController) EditUser(c echo.Context) error {
 			return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 		}
 
-		if err := uc.uu.EditUser(ctx, req); err != nil {
+		if err := uc.Usecase.EditUser(ctx, req); err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
@@ -214,7 +213,7 @@ func (uc *UserController) EditUser(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	fetch, err := uc.uu.FindUserByID(ctx, userID)
+	fetch, err := uc.Usecase.FindUserByID(ctx, userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -238,7 +237,7 @@ func (uc *UserController) EditUser(c echo.Context) error {
 //	@Router			/user/password/:id [put]
 func (uc *UserController) EditPassword(c echo.Context) error {
 	var userID int
-	sess, _ := uc.store.Get(c.Request(), "session_id")
+	sess, _ := uc.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
 		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
@@ -254,7 +253,7 @@ func (uc *UserController) EditPassword(c echo.Context) error {
 			return err
 		}
 
-		sess, _ := uc.store.Get(c.Request(), "session_id")
+		sess, _ := uc.Store.Get(c.Request(), "session_id")
 		id := sess.Values["id"]
 		if id == nil {
 			return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
@@ -273,7 +272,7 @@ func (uc *UserController) EditPassword(c echo.Context) error {
 		}
 
 		ctx := c.Request().Context()
-		fetch, err := uc.uu.FindUserByID(ctx, req.ID)
+		fetch, err := uc.Usecase.FindUserByID(ctx, req.ID)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
@@ -282,10 +281,11 @@ func (uc *UserController) EditPassword(c echo.Context) error {
 			return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 		}
 
-		if err := uc.uu.EditPassword(ctx, req); err != nil {
+		if err := uc.Usecase.EditPassword(ctx, req); err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
+		return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/user/%d", fetch.User.ID))
 	}
 
 	component := todo.EditPassword(strconv.Itoa(userID))

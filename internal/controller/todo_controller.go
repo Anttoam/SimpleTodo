@@ -24,12 +24,12 @@ type TodoUsecase interface {
 }
 
 type TodoController struct {
-	tu    TodoUsecase
-	store *redisstore.RedisStore
+	Usecase TodoUsecase
+	Store   *redisstore.RedisStore
 }
 
 func NewTodoController(e *echo.Echo, tu TodoUsecase, store *redisstore.RedisStore) {
-	t := &TodoController{tu: tu, store: store}
+	t := &TodoController{Usecase: tu, Store: store}
 
 	api := e.Group("/todo")
 	api.GET("/create", t.Create)
@@ -43,7 +43,7 @@ func NewTodoController(e *echo.Echo, tu TodoUsecase, store *redisstore.RedisStor
 }
 
 func (t *TodoController) Create(c echo.Context) error {
-	sess, _ := t.store.Get(c.Request(), "session_id")
+	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
 		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
@@ -65,7 +65,7 @@ func (t *TodoController) Create(c echo.Context) error {
 		}
 
 		ctx := c.Request().Context()
-		if err := t.tu.Create(ctx, req); err != nil {
+		if err := t.Usecase.Create(ctx, req); err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
@@ -78,7 +78,7 @@ func (t *TodoController) Create(c echo.Context) error {
 }
 
 func (t *TodoController) FindAll(c echo.Context) error {
-	sess, _ := t.store.Get(c.Request(), "session_id")
+	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
 		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
@@ -86,7 +86,7 @@ func (t *TodoController) FindAll(c echo.Context) error {
 
 	ctx := c.Request().Context()
 	userID := id.(int)
-	res, err := t.tu.FindAll(ctx, userID)
+	res, err := t.Usecase.FindAll(ctx, userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -97,7 +97,7 @@ func (t *TodoController) FindAll(c echo.Context) error {
 }
 
 func (t *TodoController) FindByID(c echo.Context) error {
-	sess, _ := t.store.Get(c.Request(), "session_id")
+	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
 		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
@@ -111,7 +111,7 @@ func (t *TodoController) FindByID(c echo.Context) error {
 	todoID := idP
 
 	ctx := c.Request().Context()
-	res, err := t.tu.FindByID(ctx, todoID)
+	res, err := t.Usecase.FindByID(ctx, todoID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -133,7 +133,7 @@ func (t *TodoController) Update(c echo.Context) error {
 		return err
 	}
 
-	sess, _ := t.store.Get(c.Request(), "session_id")
+	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
 		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
@@ -152,7 +152,7 @@ func (t *TodoController) Update(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	fetch, err := t.tu.FindByID(ctx, req.ID)
+	fetch, err := t.Usecase.FindByID(ctx, req.ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -160,11 +160,11 @@ func (t *TodoController) Update(c echo.Context) error {
 	if fetch.Todo.UserID != userID {
 		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
-	if err := t.tu.Update(ctx, req); err != nil {
+	if err := t.Usecase.Update(ctx, req); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	res, err := t.tu.FindAll(ctx, userID)
+	res, err := t.Usecase.FindAll(ctx, userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -175,7 +175,7 @@ func (t *TodoController) Update(c echo.Context) error {
 }
 
 func (t *TodoController) Delete(c echo.Context) error {
-	sess, _ := t.store.Get(c.Request(), "session_id")
+	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
 		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
@@ -187,7 +187,7 @@ func (t *TodoController) Delete(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	res, err := t.tu.FindByID(ctx, idP)
+	res, err := t.Usecase.FindByID(ctx, idP)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -196,7 +196,7 @@ func (t *TodoController) Delete(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
 	}
 
-	if err := t.tu.Delete(ctx, res.Todo.ID); err != nil {
+	if err := t.Usecase.Delete(ctx, res.Todo.ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
@@ -206,9 +206,9 @@ func (t *TodoController) Delete(c echo.Context) error {
 }
 
 func (t *TodoController) IsDone(c echo.Context) error {
-	return t.changeStatus(c, t.tu.IsDone)
+	return t.changeStatus(c, t.Usecase.IsDone)
 }
 
 func (t *TodoController) IsNotDone(c echo.Context) error {
-	return t.changeStatus(c, t.tu.IsNotDone)
+	return t.changeStatus(c, t.Usecase.IsNotDone)
 }
