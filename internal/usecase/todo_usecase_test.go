@@ -2,159 +2,188 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/Anttoam/golang-htmx-todos/domain"
 	"github.com/Anttoam/golang-htmx-todos/dto"
-	mock_repository "github.com/Anttoam/golang-htmx-todos/internal/usecase/mock"
+	"github.com/Anttoam/golang-htmx-todos/internal/usecase/mocks"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/mock/gomock"
 )
 
-func TestTodoCreate(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+func TestCreate(t *testing.T) {
+	mockTodoRepo := new(mocks.TodoRepository)
 
-	tr := mock_repository.NewMockTodoRepository(ctrl)
-	tu := NewTodoUsecase(tr)
+	t.Run("success", func(t *testing.T) {
+		mockTodoRepo.On("Create", mock.Anything, mock.AnythingOfType("*domain.Todo"), mock.AnythingOfType("int")).Return(nil).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		req := dto.CreateTodoRequest{
+			Title:       "test",
+			Description: "test",
+			UserID:      1,
+		}
+		err := u.Create(context.TODO(), req)
+		require.NoError(t, err)
+	})
 
-	ctx := context.Background()
-	tr.EXPECT().Create(ctx, gomock.Any(), gomock.Any()).
-		Times(1).
-		Return(nil)
+	t.Run("failed_to_create_todo", func(t *testing.T) {
+		mockTodoRepo.On("Create", mock.Anything, mock.AnythingOfType("*domain.Todo"), mock.AnythingOfType("int")).Return(errors.New("failed to create todo")).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		req := dto.CreateTodoRequest{
+			Title:       "test",
+			Description: "test",
+			UserID:      1,
+		}
+		err := u.Create(context.TODO(), req)
+		require.Error(t, err)
+	})
+}
 
-	req := dto.CreateTodoRequest{
+func TestFindAll(t *testing.T) {
+	mockTodoRepo := new(mocks.TodoRepository)
+	mockTodos := []*domain.Todo{
+		{
+			ID:          1,
+			Title:       "test 1",
+			Description: "test 1",
+			UserID:      1,
+		},
+		{
+			ID:          2,
+			Title:       "test 2",
+			Description: "test 2",
+			UserID:      1,
+		},
+	}
+
+	t.Run("success", func(t *testing.T) {
+		mockTodoRepo.On("FindAll", mock.Anything, mock.AnythingOfType("int")).Return(mockTodos, nil).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		userID := 1
+		_, err := u.FindAll(context.TODO(), userID)
+		require.NoError(t, err)
+	})
+
+	t.Run("failed_to_find_all_todo", func(t *testing.T) {
+		mockTodoRepo.On("FindAll", mock.Anything, mock.AnythingOfType("int")).Return(nil, errors.New("failed to find all todo")).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		userID := 1
+		_, err := u.FindAll(context.TODO(), userID)
+		require.Error(t, err)
+	})
+}
+
+func TestFindByID(t *testing.T) {
+	mockTodoRepo := new(mocks.TodoRepository)
+	mockTodo := &domain.Todo{
+		ID:          1,
 		Title:       "test",
 		Description: "test",
 		UserID:      1,
 	}
 
-	err := tu.Create(ctx, req)
-	require.NoError(t, err)
+	t.Run("success", func(t *testing.T) {
+		mockTodoRepo.On("FindByID", mock.Anything, mock.AnythingOfType("int")).Return(mockTodo, nil).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		todoID := 1
+		_, err := u.FindByID(context.TODO(), todoID)
+		require.NoError(t, err)
+	})
+
+	t.Run("failed_to_find_todo", func(t *testing.T) {
+		mockTodoRepo.On("FindByID", mock.Anything, mock.AnythingOfType("int")).Return(nil, errors.New("failed to find todo")).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		todoID := 1
+		_, err := u.FindByID(context.TODO(), todoID)
+		require.Error(t, err)
+	})
 }
 
-func TestTodoFindAll(t *testing.T) {
-	user, _ := RandomUser(t)
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+func TestUpdate(t *testing.T) {
+	mockTodoRepo := new(mocks.TodoRepository)
 
-	tr := mock_repository.NewMockTodoRepository(ctrl)
-	tu := NewTodoUsecase(tr)
+	t.Run("success", func(t *testing.T) {
+		mockTodoRepo.On("Update", mock.Anything, mock.AnythingOfType("*domain.Todo"), mock.AnythingOfType("int")).Return(nil).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		req := dto.UpdateTodoRequest{
+			ID:          1,
+			Title:       "updated",
+			Description: "updated",
+		}
+		err := u.Update(context.TODO(), req)
+		require.NoError(t, err)
+	})
 
-	ctx := context.Background()
-	tr.EXPECT().FindAll(ctx, gomock.Any()).
-		Times(1).
-		DoAndReturn(func(ctx context.Context, userID int) ([]*domain.Todo, error) {
-			return []*domain.Todo{
-				{
-					ID:          user.ID,
-					Title:       "test1",
-					Description: "test",
-					UserID:      1,
-				},
-				{
-					ID:          user.ID,
-					Title:       "test2",
-					Description: "test",
-					UserID:      1,
-				},
-			}, nil
-		})
-
-	_, err := tu.FindAll(ctx, user.ID)
-	require.NoError(t, err)
+	t.Run("failed_to_update_todo", func(t *testing.T) {
+		mockTodoRepo.On("Update", mock.Anything, mock.AnythingOfType("*domain.Todo"), mock.AnythingOfType("int")).Return(errors.New("failed to update todo")).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		req := dto.UpdateTodoRequest{
+			ID:          1,
+			Title:       "updated",
+			Description: "updated",
+		}
+		err := u.Update(context.TODO(), req)
+		require.Error(t, err)
+	})
 }
 
-func TestTodoFindByID(t *testing.T) {
-	user, _ := RandomUser(t)
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+func TestDelete(t *testing.T) {
+	mockTodoRepo := new(mocks.TodoRepository)
 
-	tr := mock_repository.NewMockTodoRepository(ctrl)
-	tu := NewTodoUsecase(tr)
+	t.Run("success", func(t *testing.T) {
+		mockTodoRepo.On("Delete", mock.Anything, mock.AnythingOfType("int")).Return(nil).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		todoID := 1
+		err := u.Delete(context.TODO(), todoID)
+		require.NoError(t, err)
+	})
 
-	ctx := context.Background()
-	tr.EXPECT().FindByID(ctx, gomock.Any()).
-		Times(1).
-		DoAndReturn(func(ctx context.Context, id int) (*domain.Todo, error) {
-			return &domain.Todo{
-				ID:          1,
-				Title:       "test",
-				Description: "test",
-				UserID:      user.ID,
-			}, nil
-		})
-
-	_, err := tu.FindByID(ctx, 1)
-	require.NoError(t, err)
+	t.Run("failed_to_delete_todo", func(t *testing.T) {
+		mockTodoRepo.On("Delete", mock.Anything, mock.AnythingOfType("int")).Return(errors.New("failed to delete todo")).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		todoID := 1
+		err := u.Delete(context.TODO(), todoID)
+		require.Error(t, err)
+	})
 }
 
-func TestTodoUpdate(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+func TestIsDone(t *testing.T) {
+	mockTodoRepo := new(mocks.TodoRepository)
 
-	tr := mock_repository.NewMockTodoRepository(ctrl)
-	tu := NewTodoUsecase(tr)
+	t.Run("success", func(t *testing.T) {
+		mockTodoRepo.On("UpdateDoneStatus", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("bool")).Return(nil).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		todoID := 1
+		err := u.IsDone(context.TODO(), todoID)
+		require.NoError(t, err)
+	})
 
-	ctx := context.Background()
-	tr.EXPECT().Update(ctx, gomock.Any(), gomock.Any()).
-		Times(1).
-		Return(nil)
-
-	req := dto.UpdateTodoRequest{
-		ID:          1,
-		Title:       "test",
-		Description: "test",
-	}
-
-	err := tu.Update(ctx, req)
-	require.NoError(t, err)
+	t.Run("failed_to_update_done_status", func(t *testing.T) {
+		mockTodoRepo.On("UpdateDoneStatus", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("bool")).Return(errors.New("failed to update done status")).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		todoID := 1
+		err := u.IsDone(context.TODO(), todoID)
+		require.Error(t, err)
+	})
 }
 
-func TestTodoDelete(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+func TestIsNotDone(t *testing.T) {
+	mockTodoRepo := new(mocks.TodoRepository)
 
-	tr := mock_repository.NewMockTodoRepository(ctrl)
-	tu := NewTodoUsecase(tr)
+	t.Run("success", func(t *testing.T) {
+		mockTodoRepo.On("UpdateDoneStatus", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("bool")).Return(nil).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		todoID := 1
+		err := u.IsNotDone(context.TODO(), todoID)
+		require.NoError(t, err)
+	})
 
-	ctx := context.Background()
-	tr.EXPECT().Delete(ctx, gomock.Any()).
-		Times(1).
-		Return(nil)
-
-	err := tu.Delete(ctx, 1)
-	require.NoError(t, err)
-}
-
-func TestTodoIsDone(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	tr := mock_repository.NewMockTodoRepository(ctrl)
-	tu := NewTodoUsecase(tr)
-
-	ctx := context.Background()
-	tr.EXPECT().UpdateDoneStatus(ctx, gomock.Any(), gomock.Any()).
-		Times(1).
-		Return(nil)
-
-	err := tu.IsDone(ctx, 1)
-	require.NoError(t, err)
-}
-
-func TestTodoIsNotDone(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	tr := mock_repository.NewMockTodoRepository(ctrl)
-	tu := NewTodoUsecase(tr)
-
-	ctx := context.Background()
-	tr.EXPECT().UpdateDoneStatus(ctx, gomock.Any(), gomock.Any()).
-		Times(1).
-		Return(nil)
-
-	err := tu.IsNotDone(ctx, 1)
-	require.NoError(t, err)
+	t.Run("failed_to_update_done_status", func(t *testing.T) {
+		mockTodoRepo.On("UpdateDoneStatus", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("bool")).Return(errors.New("failed to update done status")).Once()
+		u := NewTodoUsecase(mockTodoRepo)
+		todoID := 1
+		err := u.IsNotDone(context.TODO(), todoID)
+		require.Error(t, err)
+	})
 }
