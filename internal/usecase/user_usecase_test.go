@@ -1,155 +1,175 @@
-package usecase
+package usecase_test
 
 import (
 	"context"
+	"errors"
 	"testing"
-	"time"
 
 	"github.com/Anttoam/golang-htmx-todos/domain"
 	"github.com/Anttoam/golang-htmx-todos/dto"
-	mock_repository "github.com/Anttoam/golang-htmx-todos/internal/usecase/mock"
-	"github.com/stretchr/testify/assert"
+	"github.com/Anttoam/golang-htmx-todos/internal/usecase"
+	"github.com/Anttoam/golang-htmx-todos/internal/usecase/mocks"
+	"github.com/Anttoam/golang-htmx-todos/pkg/utils"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/mock/gomock"
 )
 
 func TestSignUp(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+	mockUserRepo := new(mocks.UserRepository)
 
-	ur := mock_repository.NewMockUserRepository(ctrl)
-	uu := NewUserUsecase(ur)
+	t.Run("success", func(t *testing.T) {
+		mockUserRepo.On("Create", mock.Anything, mock.AnythingOfType("*domain.User")).Return(nil).Once()
+		u := usecase.NewUserUsecase(mockUserRepo)
+		req := dto.SignUpRequest{
+			Name:     "test",
+			Email:    "test@example.com",
+			Password: "password",
+		}
+		err := u.SignUp(context.TODO(), req)
+		require.NoError(t, err)
+	})
 
-	req := dto.SignUpRequest{
+	t.Run("failed_to_create_user", func(t *testing.T) {
+		mockUserRepo.On("Create", mock.Anything, mock.AnythingOfType("*domain.User")).Return(errors.New("failed to create user")).Once()
+		u := usecase.NewUserUsecase(mockUserRepo)
+		req := dto.SignUpRequest{
+			Name:     "test",
+			Email:    "test@example.com",
+			Password: "password",
+		}
+		err := u.SignUp(context.TODO(), req)
+		require.Error(t, err)
+	})
+}
+
+func TestLogin(t *testing.T) {
+	mockUserRepo := new(mocks.UserRepository)
+	hashedPassword, err := utils.HashPassword("password")
+	require.NoError(t, err)
+
+	user := domain.User{
+		ID:       1,
+		Name:     "test",
+		Email:    "test@example.com",
+		Password: hashedPassword,
+	}
+
+	t.Run("success", func(t *testing.T) {
+		mockUserRepo.On("FindByEmail", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("*domain.User")).Run(func(args mock.Arguments) {
+			argUser := args.Get(2).(*domain.User)
+			*argUser = user
+		}).Return(nil).Once()
+
+		u := usecase.NewUserUsecase(mockUserRepo)
+		req := dto.LoginRequest{
+			Email:    "test@example.com",
+			Password: "password",
+		}
+		_, err = u.Login(context.TODO(), req)
+		require.NoError(t, err)
+	})
+}
+
+func TestFindUserByID(t *testing.T) {
+	mockUserRepo := new(mocks.UserRepository)
+	mockUser := &domain.User{
+		ID:       1,
 		Name:     "test",
 		Email:    "test@example.com",
 		Password: "password",
 	}
 
-	ctx := context.Background()
-	ur.EXPECT().Create(ctx, gomock.Any()).
-		Times(1).
-		Return(nil)
+	t.Run("success", func(t *testing.T) {
+		mockUserRepo.On("FindByID", mock.Anything, mock.AnythingOfType("int")).Return(mockUser, nil).Once()
+		u := usecase.NewUserUsecase(mockUserRepo)
+		userID := 1
+		_, err := u.FindUserByID(context.TODO(), userID)
+		require.NoError(t, err)
+	})
 
-	err := uu.SignUp(ctx, req)
-	require.NoError(t, err)
-}
-
-func TestLogin(t *testing.T) {
-	user, password := RandomUser(t)
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ur := mock_repository.NewMockUserRepository(ctrl)
-	uu := NewUserUsecase(ur)
-
-	req := &dto.LoginRequest{
-		Email:    user.Email,
-		Password: password,
-	}
-
-	ctx := context.Background()
-	ur.EXPECT().FindByEmail(ctx, req.Email, gomock.Any()).Times(1).DoAndReturn(
-		func(_ context.Context, _ string, u *domain.User) error {
-			*u = user
-			return nil
-		},
-	)
-
-	res, err := uu.Login(ctx, *req)
-
-	require.NoError(t, err)
-	require.NotNil(t, res)
-	assert.Equal(t, user.ID, res.ID)
-	assert.Equal(t, user.Email, res.Email)
-}
-
-func TestFindUserByID(t *testing.T) {
-	user, _ := RandomUser(t)
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ur := mock_repository.NewMockUserRepository(ctrl)
-	uu := NewUserUsecase(ur)
-
-	ctx := context.Background()
-	ur.EXPECT().FindByID(ctx, gomock.Any()).
-		Times(1).
-		DoAndReturn(
-			func(_ context.Context, _ int) (*domain.User, error) {
-				return &user, nil
-			},
-		)
-
-	res, err := uu.FindUserByID(ctx, user.ID)
-	require.NoError(t, err)
-	assert.Equal(t, user.ID, res.User.ID)
-	assert.Equal(t, user.Name, res.User.Name)
-	assert.Equal(t, user.Email, res.User.Email)
-	assert.Equal(t, user.CreatedAt, res.User.CreatedAt)
-	assert.Equal(t, user.UpdatedAt, res.User.UpdatedAt)
+	t.Run("failed_to_find_user", func(t *testing.T) {
+		mockUserRepo.On("FindByID", mock.Anything, mock.AnythingOfType("int")).Return(nil, errors.New("user not found")).Once()
+		u := usecase.NewUserUsecase(mockUserRepo)
+		userID := 1
+		_, err := u.FindUserByID(context.TODO(), userID)
+		require.Error(t, err)
+	})
 }
 
 func TestEditUser(t *testing.T) {
-	user, _ := RandomUser(t)
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ur := mock_repository.NewMockUserRepository(ctrl)
-	uu := NewUserUsecase(ur)
-
-	ctx := context.Background()
-
-	ur.EXPECT().FindByID(ctx, gomock.Any()).
-		Times(1).
-		DoAndReturn(
-			func(_ context.Context, _ int) (*domain.User, error) {
-				return &user, nil
-			},
-		)
-
-	ur.EXPECT().Update(ctx, gomock.Any(), gomock.Any()).
-		Times(1).
-		Return(nil)
-
-	req := dto.UpdateUserRequest{
-		Name:      "updateUser",
-		Email:     "updateUser@example.com",
-		UpdatedAt: time.Now(),
+	mockUserRepo := new(mocks.UserRepository)
+	mockUser := &domain.User{
+		ID:       1,
+		Name:     "test",
+		Email:    "test@example.com",
+		Password: "password",
 	}
 
-	err := uu.EditUser(ctx, req)
-	require.NoError(t, err)
+	t.Run("success", func(t *testing.T) {
+		mockUserRepo.On("FindByID", mock.Anything, mock.AnythingOfType("int")).Return(mockUser, nil).Once()
+		mockUserRepo.On("Update", mock.Anything, mock.AnythingOfType("*domain.User"), mock.AnythingOfType("int")).Return(nil).Once()
+		u := usecase.NewUserUsecase(mockUserRepo)
+		req := dto.UpdateUserRequest{
+			Name:  "updated",
+			Email: "updated@example.com",
+		}
+		err := u.EditUser(context.TODO(), req)
+		require.NoError(t, err)
+	})
+
+	t.Run("Update error", func(t *testing.T) {
+		mockUserRepo.On("FindByID", mock.Anything, mock.AnythingOfType("int")).Return(mockUser, nil).Once()
+		mockUserRepo.On("Update", mock.Anything, mock.AnythingOfType("*domain.User"), mock.AnythingOfType("int")).Return(errors.New("update failed")).Once()
+
+		u := usecase.NewUserUsecase(mockUserRepo)
+		req := dto.UpdateUserRequest{
+			ID:    1,
+			Name:  "new name",
+			Email: "newemail@example.com",
+		}
+
+		err := u.EditUser(context.TODO(), req)
+		require.Error(t, err)
+		require.Equal(t, "update failed", err.Error())
+	})
+
 }
 
 func TestEditPassword(t *testing.T) {
-	user, _ := RandomUser(t)
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ur := mock_repository.NewMockUserRepository(ctrl)
-	uu := NewUserUsecase(ur)
-
-	ctx := context.Background()
-
-	ur.EXPECT().FindByID(ctx, gomock.Any()).
-		Times(1).
-		DoAndReturn(
-			func(_ context.Context, _ int) (*domain.User, error) {
-				return &user, nil
-			},
-		)
-
-	ur.EXPECT().Update(ctx, gomock.Any(), gomock.Any()).
-		Times(1).
-		Return(nil)
-
-	req := dto.UpdatePasswordRequest{
-		Password:    "password",
-		NewPassword: "newPassword",
-		UpdatedAt:   time.Now(),
+	mockUserRepo := new(mocks.UserRepository)
+	hashedPassword, err := utils.HashPassword("password")
+	require.NoError(t, err)
+	mockUser := &domain.User{
+		ID:       1,
+		Name:     "test",
+		Email:    "test@example.com",
+		Password: hashedPassword,
 	}
 
-	err := uu.EditPassword(ctx, req)
-	require.NoError(t, err)
+	t.Run("success", func(t *testing.T) {
+		mockUserRepo.On("FindByID", mock.Anything, mock.AnythingOfType("int")).Return(mockUser, nil).Once()
+		mockUserRepo.On("Update", mock.Anything, mock.AnythingOfType("*domain.User"), mock.AnythingOfType("int")).Return(nil).Once()
+		u := usecase.NewUserUsecase(mockUserRepo)
+		require.NoError(t, err)
+		req := dto.UpdatePasswordRequest{
+			Password:    "password",
+			NewPassword: "newpassword",
+		}
+		err = u.EditPassword(context.TODO(), req)
+		require.NoError(t, err)
+	})
+
+	t.Run("failed", func(t *testing.T) {
+		mockUserRepo.On("FindByID", mock.Anything, mock.AnythingOfType("int")).Return(mockUser, nil).Once()
+		mockUserRepo.On("Update", mock.Anything, mock.AnythingOfType("*domain.User"), mock.AnythingOfType("int")).Return(errors.New("update failed")).Once()
+
+		u := usecase.NewUserUsecase(mockUserRepo)
+		req := dto.UpdatePasswordRequest{
+			Password:    "password",
+			NewPassword: "newpassword",
+		}
+		err := u.EditPassword(context.TODO(), req)
+		require.Error(t, err)
+		require.Equal(t, "update failed", err.Error())
+	})
 }
