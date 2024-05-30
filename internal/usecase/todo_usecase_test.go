@@ -1,4 +1,4 @@
-package usecase
+package usecase_test
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/Anttoam/golang-htmx-todos/domain"
 	"github.com/Anttoam/golang-htmx-todos/dto"
+	"github.com/Anttoam/golang-htmx-todos/internal/usecase"
 	"github.com/Anttoam/golang-htmx-todos/internal/usecase/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -17,7 +18,7 @@ func TestCreate(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		mockTodoRepo.On("Create", mock.Anything, mock.AnythingOfType("*domain.Todo"), mock.AnythingOfType("int")).Return(nil).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		req := dto.CreateTodoRequest{
 			Title:       "test",
 			Description: "test",
@@ -29,7 +30,7 @@ func TestCreate(t *testing.T) {
 
 	t.Run("failed_to_create_todo", func(t *testing.T) {
 		mockTodoRepo.On("Create", mock.Anything, mock.AnythingOfType("*domain.Todo"), mock.AnythingOfType("int")).Return(errors.New("failed to create todo")).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		req := dto.CreateTodoRequest{
 			Title:       "test",
 			Description: "test",
@@ -59,7 +60,7 @@ func TestFindAll(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		mockTodoRepo.On("FindAll", mock.Anything, mock.AnythingOfType("int")).Return(mockTodos, nil).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		userID := 1
 		_, err := u.FindAll(context.TODO(), userID)
 		require.NoError(t, err)
@@ -67,7 +68,7 @@ func TestFindAll(t *testing.T) {
 
 	t.Run("failed_to_find_all_todo", func(t *testing.T) {
 		mockTodoRepo.On("FindAll", mock.Anything, mock.AnythingOfType("int")).Return(nil, errors.New("failed to find all todo")).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		userID := 1
 		_, err := u.FindAll(context.TODO(), userID)
 		require.Error(t, err)
@@ -85,7 +86,7 @@ func TestFindByID(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		mockTodoRepo.On("FindByID", mock.Anything, mock.AnythingOfType("int")).Return(mockTodo, nil).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		todoID := 1
 		_, err := u.FindByID(context.TODO(), todoID)
 		require.NoError(t, err)
@@ -93,7 +94,7 @@ func TestFindByID(t *testing.T) {
 
 	t.Run("failed_to_find_todo", func(t *testing.T) {
 		mockTodoRepo.On("FindByID", mock.Anything, mock.AnythingOfType("int")).Return(nil, errors.New("failed to find todo")).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		todoID := 1
 		_, err := u.FindByID(context.TODO(), todoID)
 		require.Error(t, err)
@@ -105,7 +106,7 @@ func TestUpdate(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		mockTodoRepo.On("Update", mock.Anything, mock.AnythingOfType("*domain.Todo"), mock.AnythingOfType("int")).Return(nil).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		req := dto.UpdateTodoRequest{
 			ID:          1,
 			Title:       "updated",
@@ -117,7 +118,7 @@ func TestUpdate(t *testing.T) {
 
 	t.Run("failed_to_update_todo", func(t *testing.T) {
 		mockTodoRepo.On("Update", mock.Anything, mock.AnythingOfType("*domain.Todo"), mock.AnythingOfType("int")).Return(errors.New("failed to update todo")).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		req := dto.UpdateTodoRequest{
 			ID:          1,
 			Title:       "updated",
@@ -133,7 +134,7 @@ func TestDelete(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		mockTodoRepo.On("Delete", mock.Anything, mock.AnythingOfType("int")).Return(nil).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		todoID := 1
 		err := u.Delete(context.TODO(), todoID)
 		require.NoError(t, err)
@@ -141,7 +142,7 @@ func TestDelete(t *testing.T) {
 
 	t.Run("failed_to_delete_todo", func(t *testing.T) {
 		mockTodoRepo.On("Delete", mock.Anything, mock.AnythingOfType("int")).Return(errors.New("failed to delete todo")).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		todoID := 1
 		err := u.Delete(context.TODO(), todoID)
 		require.Error(t, err)
@@ -153,7 +154,7 @@ func TestIsDone(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		mockTodoRepo.On("UpdateDoneStatus", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("bool")).Return(nil).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		todoID := 1
 		err := u.IsDone(context.TODO(), todoID)
 		require.NoError(t, err)
@@ -161,7 +162,7 @@ func TestIsDone(t *testing.T) {
 
 	t.Run("failed_to_update_done_status", func(t *testing.T) {
 		mockTodoRepo.On("UpdateDoneStatus", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("bool")).Return(errors.New("failed to update done status")).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		todoID := 1
 		err := u.IsDone(context.TODO(), todoID)
 		require.Error(t, err)
@@ -173,7 +174,7 @@ func TestIsNotDone(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		mockTodoRepo.On("UpdateDoneStatus", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("bool")).Return(nil).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		todoID := 1
 		err := u.IsNotDone(context.TODO(), todoID)
 		require.NoError(t, err)
@@ -181,7 +182,7 @@ func TestIsNotDone(t *testing.T) {
 
 	t.Run("failed_to_update_done_status", func(t *testing.T) {
 		mockTodoRepo.On("UpdateDoneStatus", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("bool")).Return(errors.New("failed to update done status")).Once()
-		u := NewTodoUsecase(mockTodoRepo)
+		u := usecase.NewTodoUsecase(mockTodoRepo)
 		todoID := 1
 		err := u.IsNotDone(context.TODO(), todoID)
 		require.Error(t, err)
