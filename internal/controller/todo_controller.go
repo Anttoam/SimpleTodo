@@ -2,11 +2,11 @@ package controller
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/Anttoam/golang-htmx-todos/dto"
+	"github.com/Anttoam/golang-htmx-todos/views/error_page"
 	"github.com/Anttoam/golang-htmx-todos/views/todo"
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
@@ -58,7 +58,12 @@ func (t *TodoController) Create(c echo.Context) error {
 	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
-		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+		c.Response().WriteHeader(http.StatusUnauthorized)
+		if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+		return nil
 	}
 
 	if c.Request().Method == http.MethodPost {
@@ -104,7 +109,12 @@ func (t *TodoController) FindAll(c echo.Context) error {
 	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
-		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+		c.Response().WriteHeader(http.StatusUnauthorized)
+		if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+		return nil
 	}
 
 	ctx := c.Request().Context()
@@ -135,7 +145,12 @@ func (t *TodoController) FindByID(c echo.Context) error {
 	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
-		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+		c.Response().WriteHeader(http.StatusUnauthorized)
+		if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+		return nil
 	}
 
 	idP, err := strconv.Atoi(c.Param("id"))
@@ -151,7 +166,12 @@ func (t *TodoController) FindByID(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	if res.Todo.UserID != id.(int) {
-		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+		c.Response().WriteHeader(http.StatusUnauthorized)
+		if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+		return nil
 	}
 
 	component := todo.EditForm(strconv.Itoa(res.Todo.ID), res.Todo.Title, res.Todo.Description)
@@ -184,7 +204,12 @@ func (t *TodoController) Update(c echo.Context) error {
 	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
-		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+		c.Response().WriteHeader(http.StatusUnauthorized)
+		if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+		return nil
 	}
 	userID := id.(int)
 
@@ -206,7 +231,12 @@ func (t *TodoController) Update(c echo.Context) error {
 	}
 
 	if fetch.Todo.UserID != userID {
-		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+		c.Response().WriteHeader(http.StatusUnauthorized)
+		if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+		return nil
 	}
 	if err := t.Usecase.Update(ctx, req); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -238,7 +268,12 @@ func (t *TodoController) Delete(c echo.Context) error {
 	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
-		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+		c.Response().WriteHeader(http.StatusUnauthorized)
+		if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+		return nil
 	}
 
 	idP, err := strconv.Atoi(c.Param("id"))
@@ -253,7 +288,12 @@ func (t *TodoController) Delete(c echo.Context) error {
 	}
 
 	if res.Todo.UserID != id.(int) {
-		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+		c.Response().WriteHeader(http.StatusUnauthorized)
+		if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+		return nil
 	}
 
 	if err := t.Usecase.Delete(ctx, res.Todo.ID); err != nil {

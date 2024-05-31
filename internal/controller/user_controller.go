@@ -2,13 +2,13 @@ package controller
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/Anttoam/golang-htmx-todos/dto"
+	"github.com/Anttoam/golang-htmx-todos/views/error_page"
 	"github.com/Anttoam/golang-htmx-todos/views/todo"
 	"github.com/Anttoam/golang-htmx-todos/views/user"
 	"github.com/a-h/templ"
@@ -161,7 +161,12 @@ func (uc *UserController) EditUser(c echo.Context) error {
 	sess, _ := uc.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
-		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+		c.Response().WriteHeader(http.StatusUnauthorized)
+		if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+		return nil
 	}
 	userID = id.(int)
 
@@ -179,7 +184,12 @@ func (uc *UserController) EditUser(c echo.Context) error {
 		sess, _ := uc.Store.Get(c.Request(), "session_id")
 		id := sess.Values["id"]
 		if id == nil {
-			return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+			c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+			c.Response().WriteHeader(http.StatusUnauthorized)
+			if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+				return c.JSON(http.StatusInternalServerError, err.Error())
+			}
+			return nil
 		}
 		userID := id.(int)
 
@@ -201,7 +211,12 @@ func (uc *UserController) EditUser(c echo.Context) error {
 		}
 
 		if fetch.User.ID != userID {
-			return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+			c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+			c.Response().WriteHeader(http.StatusUnauthorized)
+			if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+				return c.JSON(http.StatusInternalServerError, err.Error())
+			}
+			return nil
 		}
 
 		if err := uc.Usecase.EditUser(ctx, req); err != nil {
@@ -240,7 +255,12 @@ func (uc *UserController) EditPassword(c echo.Context) error {
 	sess, _ := uc.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
-		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+		c.Response().WriteHeader(http.StatusUnauthorized)
+		if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+		return nil
 	}
 	userID = id.(int)
 
@@ -256,7 +276,12 @@ func (uc *UserController) EditPassword(c echo.Context) error {
 		sess, _ := uc.Store.Get(c.Request(), "session_id")
 		id := sess.Values["id"]
 		if id == nil {
-			return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+			c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+			c.Response().WriteHeader(http.StatusUnauthorized)
+			if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+				return c.JSON(http.StatusInternalServerError, err.Error())
+			}
+			return nil
 		}
 		userID := id.(int)
 
@@ -278,7 +303,12 @@ func (uc *UserController) EditPassword(c echo.Context) error {
 		}
 
 		if fetch.User.ID != userID {
-			return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
+			c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+			c.Response().WriteHeader(http.StatusUnauthorized)
+			if err := error_page.Error401().Render(c.Request().Context(), c.Response().Writer); err != nil {
+				return c.JSON(http.StatusInternalServerError, err.Error())
+			}
+			return nil
 		}
 
 		if err := uc.Usecase.EditPassword(ctx, req); err != nil {

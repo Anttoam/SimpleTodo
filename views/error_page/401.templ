@@ -1,0 +1,17 @@
+package error_page
+
+templ Error401() {
+	<section>
+		<div>
+			<h1>
+				401 Unauthorized
+			</h1>
+		</div>
+		<p class>
+			ログインセッションの有効期限が切れました。お手数ですが再度ログインをお願いします。
+		</p>
+		<a hx-swap="transition:true" href="/user/login">
+			ログインページへ
+		</a>
+	</section>
+}
