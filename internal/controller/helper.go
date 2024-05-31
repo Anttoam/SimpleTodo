@@ -17,7 +17,7 @@ func (t *TodoController) changeStatus(c echo.Context, changeFunc func(ctx contex
 		return c.JSON(http.StatusNotFound, err.Error())
 	}
 
-	sess, _ := t.store.Get(c.Request(), "session_id")
+	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
 	if id == nil {
 		return c.JSON(http.StatusUnauthorized, errors.New("Unauthorized").Error())
@@ -25,7 +25,7 @@ func (t *TodoController) changeStatus(c echo.Context, changeFunc func(ctx contex
 	userID := id.(int)
 
 	ctx := c.Request().Context()
-	fetch, err := t.tu.FindByID(ctx, idP)
+	fetch, err := t.Usecase.FindByID(ctx, idP)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -38,7 +38,7 @@ func (t *TodoController) changeStatus(c echo.Context, changeFunc func(ctx contex
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	res, err := t.tu.FindAll(ctx, userID)
+	res, err := t.Usecase.FindAll(ctx, userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
