@@ -28,7 +28,7 @@ func TestTodoCreate(t *testing.T) {
 
 	tr := NewTodoRepository(db)
 
-	err = tr.Create(context.Background(), todo, todo.UserID)
+	err = tr.Create(context.TODO(), todo, todo.UserID)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -65,7 +65,7 @@ func TestTodoFindAll(t *testing.T) {
 
 	tr := NewTodoRepository(db)
 
-	_, err = tr.FindAll(context.Background(), userID)
+	_, err = tr.FindAll(context.TODO(), userID)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -100,7 +100,7 @@ func TestTodoFindByID(t *testing.T) {
 
 	tr := NewTodoRepository(db)
 
-	_, err = tr.FindByID(context.Background(), todo.ID)
+	_, err = tr.FindByID(context.TODO(), todo.ID)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -127,7 +127,7 @@ func TestTodoUpdate(t *testing.T) {
 
 	tr := NewTodoRepository(db)
 
-	err = tr.Update(context.Background(), todo, todo.ID)
+	err = tr.Update(context.TODO(), todo, todo.ID)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -151,7 +151,7 @@ func TestTodoDelete(t *testing.T) {
 
 	tr := NewTodoRepository(db)
 
-	err = tr.Delete(context.Background(), todo.ID)
+	err = tr.Delete(context.TODO(), todo.ID)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -178,7 +178,7 @@ func TestTodoUpdateDoneStatus(t *testing.T) {
 
 	repo := NewTodoRepository(db)
 
-	err = repo.UpdateDoneStatus(context.Background(), todo.ID, todo.Done)
+	err = repo.UpdateDoneStatus(context.TODO(), todo.ID, todo.Done)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()

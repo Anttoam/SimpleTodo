@@ -28,7 +28,7 @@ func TestUserRepository_Create(t *testing.T) {
 
 	ur := NewUserRepository(db)
 
-	err = ur.Create(context.Background(), user)
+	err = ur.Create(context.TODO(), user)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -54,7 +54,7 @@ func TestUserRepository_FindByEmail(t *testing.T) {
 
 	ur := NewUserRepository(db)
 
-	err = ur.FindByEmail(context.Background(), user.Email, user)
+	err = ur.FindByEmail(context.TODO(), user.Email, user)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -79,7 +79,7 @@ func TestUserRepository_FindByID(t *testing.T) {
 
 	ur := NewUserRepository(db)
 
-	_, err = ur.FindByID(context.Background(), user.ID)
+	_, err = ur.FindByID(context.TODO(), user.ID)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -103,7 +103,7 @@ func TestUserRepository_Update(t *testing.T) {
 
 	ur := NewUserRepository(db)
 
-	err = ur.Update(context.Background(), user, user.ID)
+	err = ur.Update(context.TODO(), user, user.ID)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
