@@ -22,16 +22,19 @@ migrate:
 	atlas schema apply -u "${TURSO_DB_URL}?authToken=${TURSO_DB_TOKEN}" --to sqlite://migration/todo.db
 
 mockur:
-	mockgen -source internal/usecase/user_usecase.go -destination internal/usecase/mock/user_repository.go -package mock_repository
+	mockery --dir=internal/usecase --name=UserRepository --filename=user_repository.go --output internal/usecase/mocks --outpkg=mocks
 
 mocktr:
-	mockgen -source internal/usecase/todo_usecase.go -destination internal/usecase/mock/todo_repository.go -package mock_repository
+	mockery --dir=internal/usecase --name=TodoRepository --filename=todo_repository.go --output internal/usecase/mocks --outpkg=mocks
 
 mockuu:
-	mockgen -source internal/controller/user_controller.go -destination internal/controller/mock/user_usecase.go -package mock_usecase
+	mockery --dir=internal/controller --name=UserUsecase --filename=user_usecase.go --output internal/controller/mocks --outpkg=mocks
+
+mocktu:
+	mockery --dir=internal/controller --name=TodoUsecase --filename=todo_usecase.go --output internal/controller/mocks --outpkg=mocks
 
 swag:
 	swag init -g cmd/main.go
 	swag fmt
 
-.PHONY: db-shall check-code redis atlas-inspect atlas-apply migrate mockur mocktr mockuu swag
+.PHONY: db-shall check-code redis atlas-inspect atlas-apply migrate mockur mocktr mockuu mocktu swag
