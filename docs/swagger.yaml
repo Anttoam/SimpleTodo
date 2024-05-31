@@ -4,6 +4,7 @@ definitions:
       email:
         type: string
       password:
+        minLength: 6
         type: string
     required:
     - email
@@ -41,6 +42,19 @@ definitions:
     - new_password
     - password
     type: object
+  dto.UpdateTodoRequest:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - id
+    type: object
   dto.UpdateUserRequest:
     properties:
       email:
@@ -60,6 +74,90 @@ info:
   title: Simple Todo API
   version: "1.0"
 paths:
+  /todo/:
+    get:
+      description: Find all todo
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: FindAll
+      tags:
+      - todo
+  /todo/:id:
+    delete:
+      description: Delete todo
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: Delete
+      tags:
+      - todo
+    get:
+      description: Find todo by ID
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: FindByID
+      tags:
+      - todo
+    put:
+      description: Update todo
+      parameters:
+      - description: Todo ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Todo Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateTodoRequest'
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: Update
+      tags:
+      - todo
+  /todo/create:
+    post:
+      description: Create a new todo
+      parameters:
+      - description: Create User Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignUpRequest'
+      responses:
+        "303":
+          description: ok
+          schema:
+            type: string
+      summary: Create
+      tags:
+      - todo
   /user/:id:
     put:
       description: Edit user

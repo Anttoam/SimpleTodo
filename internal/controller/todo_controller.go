@@ -42,6 +42,18 @@ func NewTodoController(e *echo.Echo, tu TodoUsecase, store *redisstore.RedisStor
 	api.PUT("/notdone/:id", t.IsNotDone)
 }
 
+// Create godoc
+//
+//	@Summary		Create
+//	@Description	Create a new todo
+//	@Tags			todo
+//
+// Accept json
+// Produce json
+//
+//	@Param			request	body		dto.SignUpRequest	true	"Create User Request"
+//	@Success		303		{string}	string				"ok"
+//	@Router			/todo/create [post]
 func (t *TodoController) Create(c echo.Context) error {
 	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
@@ -77,6 +89,17 @@ func (t *TodoController) Create(c echo.Context) error {
 	return handler(c)
 }
 
+// FindAll godoc
+//
+//	@Summary		FindAll
+//	@Description	Find all todo
+//	@Tags			todo
+//
+// Accept json
+// Produce json
+//
+//	@Success		200	{string}	string	"ok"
+//	@Router			/todo/ [get]
 func (t *TodoController) FindAll(c echo.Context) error {
 	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
@@ -96,6 +119,18 @@ func (t *TodoController) FindAll(c echo.Context) error {
 	return handler(c)
 }
 
+// FindByID godoc
+//
+//	@Summary		FindByID
+//	@Description	Find todo by ID
+//	@Tags			todo
+//
+// Accept json
+// Produce json
+//
+//	@Param			id	path		int		true	"Todo ID"
+//	@Success		200	{string}	string	"ok"
+//	@Router			/todo/:id [get]
 func (t *TodoController) FindByID(c echo.Context) error {
 	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
@@ -124,6 +159,19 @@ func (t *TodoController) FindByID(c echo.Context) error {
 	return handler(c)
 }
 
+// Update godoc
+//
+//	@Summary		Update
+//	@Description	Update todo
+//	@Tags			todo
+//
+// Accept json
+// Produce json
+//
+//	@Param			id		path		int						true	"Todo ID"
+//	@Param			request	body		dto.UpdateTodoRequest	true	"Update Todo Request"
+//	@Success		200		{string}	string					"ok"
+//	@Router			/todo/:id [put]
 func (t *TodoController) Update(c echo.Context) error {
 	req := dto.UpdateTodoRequest{
 		Title:       c.FormValue("title"),
@@ -174,6 +222,18 @@ func (t *TodoController) Update(c echo.Context) error {
 	return handler(c)
 }
 
+// Delete godoc
+//
+//	@Summary		Delete
+//	@Description	Delete todo
+//	@Tags			todo
+//
+// Accept json
+// Produce json
+//
+//	@Param			id	path		int		true	"Todo ID"
+//	@Success		200	{string}	string	"ok"
+//	@Router			/todo/:id [delete]
 func (t *TodoController) Delete(c echo.Context) error {
 	sess, _ := t.Store.Get(c.Request(), "session_id")
 	id := sess.Values["id"]
