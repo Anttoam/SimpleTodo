@@ -268,11 +268,13 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "testuser"
                 },
                 "password": {
                     "type": "string",
-                    "minLength": 6
+                    "minLength": 6,
+                    "example": "password"
                 }
             }
         },
@@ -285,15 +287,18 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "testuser@test.com"
                 },
                 "name": {
                     "type": "string",
-                    "minLength": 2
+                    "minLength": 2,
+                    "example": "testuser"
                 },
                 "password": {
                     "type": "string",
-                    "minLength": 6
+                    "minLength": 6,
+                    "example": "password"
                 }
             }
         },
@@ -328,13 +333,20 @@ const docTemplate = `{
             ],
             "properties": {
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "example": "updated test"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 1,
+                    "example": "updated test"
                 },
                 "updated_at": {
                     "type": "string"
@@ -348,13 +360,17 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "updated@test.com"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 2,
+                    "example": "updateduser"
                 },
                 "updated_at": {
                     "type": "string"

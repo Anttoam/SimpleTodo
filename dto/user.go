@@ -7,9 +7,9 @@ import (
 )
 
 type SignUpRequest struct {
-	Name     string `json:"name" validate:"required,min=2"`
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
+	Name     string `json:"name" validate:"required,min=2" example:"testuser"`
+	Email    string `json:"email" validate:"required,email" example:"testuser@test.com"`
+	Password string `json:"password" validate:"required,min=6" example:"password"`
 }
 
 type SignUpResponse struct {
@@ -19,8 +19,8 @@ type SignUpResponse struct {
 }
 
 type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
+	Email    string `json:"email" validate:"required,email" example:"testuser"`
+	Password string `json:"password" validate:"required,min=6" example:"password"`
 }
 
 type LoginResponse struct {
@@ -33,9 +33,9 @@ type FindByIDUserResponse struct {
 }
 
 type UpdateUserRequest struct {
-	ID        int       `json:"id" validate:"required"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
+	ID        int       `json:"id" validate:"required" example:"1"`
+	Name      string    `json:"name" validate:"min=2" example:"updateduser"`
+	Email     string    `json:"email" validate:"email" example:"updated@test.com"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 

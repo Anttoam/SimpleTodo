@@ -2,8 +2,10 @@ definitions:
   dto.LoginRequest:
     properties:
       email:
+        example: testuser
         type: string
       password:
+        example: password
         minLength: 6
         type: string
     required:
@@ -13,11 +15,14 @@ definitions:
   dto.SignUpRequest:
     properties:
       email:
+        example: testuser@test.com
         type: string
       name:
+        example: testuser
         minLength: 2
         type: string
       password:
+        example: password
         minLength: 6
         type: string
     required:
@@ -45,10 +50,17 @@ definitions:
   dto.UpdateTodoRequest:
     properties:
       description:
+        example: updated test
+        maxLength: 255
+        minLength: 1
         type: string
       id:
+        example: 1
         type: integer
       title:
+        example: updated test
+        maxLength: 30
+        minLength: 1
         type: string
       updated_at:
         type: string
@@ -58,10 +70,14 @@ definitions:
   dto.UpdateUserRequest:
     properties:
       email:
+        example: updated@test.com
         type: string
       id:
+        example: 1
         type: integer
       name:
+        example: updateduser
+        minLength: 2
         type: string
       updated_at:
         type: string
