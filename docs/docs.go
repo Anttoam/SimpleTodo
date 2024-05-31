@@ -335,7 +335,6 @@ const docTemplate = `{
                 "description": {
                     "type": "string",
                     "maxLength": 255,
-                    "minLength": 1,
                     "example": "updated test"
                 },
                 "id": {
