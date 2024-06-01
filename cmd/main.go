@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/Anttoam/SimpleTodo/config"
 	"github.com/Anttoam/SimpleTodo/internal/controller"
@@ -70,11 +71,14 @@ func main() {
 		HttpOnly: true,
 		// Secure:   true,
 	})
+
 	e.Static("/dist", "./dist")
 	controller.NewUserController(e, userUsecase, store)
-
 	controller.NewTodoController(e, todoUsecase, store)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	e.GET("/", func(c echo.Context) error {
+		return c.Redirect(http.StatusMovedPermanently, "/user/login")
+	})
 	e.Logger.Fatal(e.Start(":8080"))
 }
