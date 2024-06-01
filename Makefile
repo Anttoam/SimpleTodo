@@ -37,4 +37,7 @@ swag:
 	swag init -g cmd/main.go
 	swag fmt
 
-.PHONY: db-shall check-code redis atlas-inspect atlas-apply migrate mockur mocktr mockuu mocktu swag
+test:
+	go test -v -cover ./...
+
+.PHONY: db-shall check-code redis atlas-inspect atlas-apply migrate mockur mocktr mockuu mocktu swag test
