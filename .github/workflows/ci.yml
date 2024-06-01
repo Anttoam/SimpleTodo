@@ -36,7 +36,6 @@ jobs:
       run: |
         make atlas-inspect
         make atlas-apply
-        make migrate
     
     - name: Run tests
       run: make test
