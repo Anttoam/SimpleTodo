@@ -36,6 +36,7 @@ jobs:
       run: |
         make atlas-inspect
         make atlas-apply
+        atlas schema apply -u "${{ secrets.TURSO_DB_URL}}?authToken=${{ secrets.TURSO_DB_TOKEN}}" --to sqlite://migration/todo.db
     
     - name: Run tests
       run: make test
