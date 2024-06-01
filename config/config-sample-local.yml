@@ -1,0 +1,8 @@
+turso:
+  name: sample
+  token: sample
+
+redis:
+  host: localhost
+  port: 6379
+
