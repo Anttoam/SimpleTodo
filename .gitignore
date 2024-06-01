@@ -1,5 +1,5 @@
 node_modules
-config/config-local.yml
+# config/config-local.yml
 tmp
 .env
 data
