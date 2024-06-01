@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Anttoam/golang-htmx-todos/dto"
-	"github.com/Anttoam/golang-htmx-todos/views/error_page"
-	"github.com/Anttoam/golang-htmx-todos/views/todo"
+	"github.com/Anttoam/SimpleTodo/dto"
+	"github.com/Anttoam/SimpleTodo/views/error_page"
+	"github.com/Anttoam/SimpleTodo/views/todo"
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	"github.com/rbcervilla/redisstore/v9"

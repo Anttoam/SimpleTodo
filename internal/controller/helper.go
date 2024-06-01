@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Anttoam/golang-htmx-todos/views/todo"
+	"github.com/Anttoam/SimpleTodo/views/todo"
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )

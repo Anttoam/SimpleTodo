@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Anttoam/golang-htmx-todos/domain"
-	"github.com/Anttoam/golang-htmx-todos/dto"
-	"github.com/Anttoam/golang-htmx-todos/pkg/utils"
+	"github.com/Anttoam/SimpleTodo/domain"
+	"github.com/Anttoam/SimpleTodo/dto"
+	"github.com/Anttoam/SimpleTodo/pkg/utils"
 )
 
 type UserRepository interface {

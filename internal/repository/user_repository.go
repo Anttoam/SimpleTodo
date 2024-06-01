@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/Anttoam/golang-htmx-todos/domain"
+	"github.com/Anttoam/SimpleTodo/domain"
 )
 
 type UserRepository struct {

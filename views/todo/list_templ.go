@@ -12,7 +12,7 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/Anttoam/golang-htmx-todos/dto"
+	"github.com/Anttoam/SimpleTodo/dto"
 	"github.com/a-h/templ"
 )
 

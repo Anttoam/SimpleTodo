@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Anttoam/golang-htmx-todos/domain"
+	"github.com/Anttoam/SimpleTodo/domain"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
 )

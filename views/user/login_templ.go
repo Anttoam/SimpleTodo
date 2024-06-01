@@ -10,7 +10,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/Anttoam/golang-htmx-todos/views/base"
+	"github.com/Anttoam/SimpleTodo/views/base"
 	"github.com/a-h/templ"
 )
 

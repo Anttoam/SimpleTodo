@@ -5,11 +5,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/Anttoam/golang-htmx-todos/domain"
-	"github.com/Anttoam/golang-htmx-todos/dto"
-	"github.com/Anttoam/golang-htmx-todos/internal/usecase"
-	"github.com/Anttoam/golang-htmx-todos/internal/usecase/mocks"
-	"github.com/Anttoam/golang-htmx-todos/pkg/utils"
+	"github.com/Anttoam/SimpleTodo/domain"
+	"github.com/Anttoam/SimpleTodo/dto"
+	"github.com/Anttoam/SimpleTodo/internal/usecase"
+	"github.com/Anttoam/SimpleTodo/internal/usecase/mocks"
+	"github.com/Anttoam/SimpleTodo/pkg/utils"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

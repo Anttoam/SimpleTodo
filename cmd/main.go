@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Anttoam/golang-htmx-todos/config"
-	"github.com/Anttoam/golang-htmx-todos/internal/controller"
-	"github.com/Anttoam/golang-htmx-todos/internal/repository"
-	"github.com/Anttoam/golang-htmx-todos/internal/usecase"
-	"github.com/Anttoam/golang-htmx-todos/pkg/turso"
-	"github.com/Anttoam/golang-htmx-todos/pkg/validation"
+	"github.com/Anttoam/SimpleTodo/config"
+	"github.com/Anttoam/SimpleTodo/internal/controller"
+	"github.com/Anttoam/SimpleTodo/internal/repository"
+	"github.com/Anttoam/SimpleTodo/internal/usecase"
+	"github.com/Anttoam/SimpleTodo/pkg/turso"
+	"github.com/Anttoam/SimpleTodo/pkg/validation"
 	"github.com/go-playground/validator"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
@@ -19,7 +19,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
-	_ "github.com/Anttoam/golang-htmx-todos/docs"
+	_ "github.com/Anttoam/SimpleTodo/docs"
 )
 
 // @title			Simple Todo API

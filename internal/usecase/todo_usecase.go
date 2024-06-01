@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/Anttoam/golang-htmx-todos/domain"
-	"github.com/Anttoam/golang-htmx-todos/dto"
+	"github.com/Anttoam/SimpleTodo/domain"
+	"github.com/Anttoam/SimpleTodo/dto"
 )
 
 type TodoRepository interface {

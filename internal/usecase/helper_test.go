@@ -3,8 +3,8 @@ package usecase
 import (
 	"testing"
 
-	"github.com/Anttoam/golang-htmx-todos/domain"
-	"github.com/Anttoam/golang-htmx-todos/pkg/utils"
+	"github.com/Anttoam/SimpleTodo/domain"
+	"github.com/Anttoam/SimpleTodo/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
 

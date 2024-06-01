@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	dto "github.com/Anttoam/golang-htmx-todos/dto"
+	dto "github.com/Anttoam/SimpleTodo/dto"
 
 	mock "github.com/stretchr/testify/mock"
 )

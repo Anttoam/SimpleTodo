@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Anttoam/golang-htmx-todos/config"
+	"github.com/Anttoam/SimpleTodo/config"
 
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )

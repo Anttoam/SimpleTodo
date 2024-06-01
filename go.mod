@@ -1,4 +1,4 @@
-module github.com/Anttoam/golang-htmx-todos
+module github.com/Anttoam/SimpleTodo
 
 go 1.22.2
 
