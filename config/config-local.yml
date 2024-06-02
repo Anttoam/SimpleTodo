@@ -3,5 +3,5 @@ turso:
   token: sample
 
 redis:
-  host: localhost
+  host: redis
   port: 6379
