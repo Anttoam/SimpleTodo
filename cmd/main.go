@@ -69,7 +69,7 @@ func main() {
 		Domain:   "localhost",
 		MaxAge:   43200, // 12 hours
 		HttpOnly: true,
-		// Secure:   true,
+		Secure:   true,
 	})
 
 	e.Static("/dist", "./dist")
