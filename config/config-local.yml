@@ -1,7 +1,0 @@
-turso:
-  name: sample
-  token: sample
-
-redis:
-  host: redis
-  port: 6379

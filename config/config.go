@@ -1,9 +1,9 @@
 package config
 
 import (
-	"errors"
+	"log"
 
-	"github.com/spf13/viper"
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -11,41 +11,13 @@ type Config struct {
 	Redis RedisConfig
 }
 
-type TursoConfig struct {
-	Name  string
-	Token string
-}
-
-type RedisConfig struct {
-	Host string
-	Port int
-}
-
-func LoadConfig(filename string) (*viper.Viper, error) {
-	v := viper.New()
-
-	v.SetConfigName(filename)
-	v.AddConfigPath(".")
-	v.AutomaticEnv()
-	if err := v.ReadInConfig(); err != nil {
-		var notFoundError viper.ConfigFileNotFoundError
-		if errors.As(err, &notFoundError) {
-			return v, errors.New("config file not found")
-		}
-		return nil, err
+func NewConfig() *Config {
+	if err := godotenv.Load(".env"); err != nil {
+		log.Printf("Error loading .env file")
 	}
 
-	return v, nil
-}
-
-func ParseConfig(v *viper.Viper) (*Config, error) {
-	var cfg Config
-	if err := v.Unmarshal(&cfg); err != nil {
-		return nil, err
+	return &Config{
+		Turso: LoadTursoConfig(),
+		Redis: LoadRedisConfig(),
 	}
-	return &cfg, nil
-}
-
-func GetConfigPath(configPath string) string {
-	return "./config/config-local"
 }

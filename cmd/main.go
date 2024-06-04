@@ -27,17 +27,7 @@ import (
 // @version		1.0
 // @description	example todo api
 func main() {
-	cfgPath := config.GetConfigPath("local")
-	cfgFile, err := config.LoadConfig(cfgPath)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	cfg, err := config.ParseConfig(cfgFile)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
+	cfg := config.NewConfig()
 	db, err := turso.NewLibsqlDB(cfg)
 	if err != nil {
 		log.Fatalln(err)
@@ -56,8 +46,9 @@ func main() {
 		Format: "time=${time_rfc3339_nano}, method=${method}, uri=${uri}, status=${status}\n",
 	}))
 
+	log.Println(cfg.Redis.Host)
 	client := redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%d", cfg.Redis.Host, cfg.Redis.Port),
+		Addr: fmt.Sprintf("%s:%s", cfg.Redis.Host, cfg.Redis.Port),
 	})
 	store, err := redisstore.NewRedisStore(context.Background(), client)
 	if err != nil {
