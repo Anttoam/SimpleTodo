@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/Anttoam/SimpleTodo/config"
@@ -53,9 +55,14 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	Isbool, err := strconv.ParseBool(cfg.Redis.Secure)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	if strings.HasPrefix(uri, "rediss") {
 		opts.TLSConfig = &tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: Isbool,
 		}
 	}
 
@@ -82,5 +89,5 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.Redirect(http.StatusMovedPermanently, "/user/login")
 	})
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", cfg.Http.Port)))
 }
