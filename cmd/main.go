@@ -68,7 +68,7 @@ func main() {
 	store.KeyPrefix("session_")
 	store.Options(sessions.Options{
 		Path:     "/",
-		Domain:   "localhost",
+		Domain:   cfg.Http.Domain,
 		MaxAge:   43200, // 12 hours
 		HttpOnly: true,
 		Secure:   true,

@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Turso TursoConfig
 	Redis RedisConfig
+	Http  HttpConfig
 }
 
 func NewConfig() *Config {
@@ -19,5 +20,6 @@ func NewConfig() *Config {
 	return &Config{
 		Turso: LoadTursoConfig(),
 		Redis: LoadRedisConfig(),
+		Http:  LoadHttpConfig(),
 	}
 }
