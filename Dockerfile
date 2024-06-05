@@ -8,7 +8,7 @@ RUN curl -sSf https://atlasgo.sh | sh
 FROM alpine
 WORKDIR /app
 COPY --from=builder /app/main .
-COPY config ./config
+COPY .env .env
 COPY migration ./migration
 
 EXPOSE 8080
