@@ -26,7 +26,7 @@ func AuthNavBar() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div hx-boost=\"true\" class=\"flex justify-between py-8 px-8\"><h1 class=\"text-2xl font-bold\">Simple Todo</h1><nav><ul class=\"flex justify-end space-x-4 pr-8\"><li><a href=\"/user/signup\">サインアップ</a></li><li><a href=\"/user/login\">ログイン</a></li></ul></nav></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div hx-boost=\"true\" class=\"md:flex justify-between py-8 px-8\"><h1 class=\"text-2xl font-bold\">Simple Todo</h1><nav><ul class=\"md:flex justify-end space-x-4 pr-8\"><li><a href=\"/user/signup\">サインアップ</a></li><li><a href=\"/user/login\">ログイン</a></li></ul></nav></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
