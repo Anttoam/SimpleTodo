@@ -82,5 +82,5 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.Redirect(http.StatusMovedPermanently, "/user/login")
 	})
-	e.Logger.Fatal(e.Start(":8090"))
+	e.Logger.Fatal(e.Start(":8080"))
 }
