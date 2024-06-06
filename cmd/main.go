@@ -2,12 +2,9 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/Anttoam/SimpleTodo/config"
 	"github.com/Anttoam/SimpleTodo/internal/controller"
@@ -49,26 +46,11 @@ func main() {
 		Format: "time=${time_rfc3339_nano}, method=${method}, uri=${uri}, status=${status}\n",
 	}))
 
-	uri := cfg.Redis.Url
-	opts, err := redis.ParseURL(uri)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	client := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%s:%s", cfg.Redis.Host, cfg.Redis.Port),
+	})
 
-	Isbool, err := strconv.ParseBool(cfg.Redis.Secure)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	if strings.HasPrefix(uri, "rediss") {
-		opts.TLSConfig = &tls.Config{
-			InsecureSkipVerify: Isbool,
-		}
-	}
-
-	rdb := redis.NewClient(opts)
-
-	store, err := redisstore.NewRedisStore(context.Background(), rdb)
+	store, err := redisstore.NewRedisStore(context.Background(), client)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -89,5 +71,6 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.Redirect(http.StatusMovedPermanently, "/user/login")
 	})
+	log.Println("Server started at", cfg.Http.Port)
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", cfg.Http.Port)))
 }
