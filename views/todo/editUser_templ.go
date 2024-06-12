@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/Anttoam/SimpleTodo/views/base"
+	"github.com/Anttoam/SimpleTodo/views/layout"
 	"github.com/a-h/templ"
 )
 
@@ -32,7 +32,7 @@ func EditUser(id string, name string, email string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = base.Header().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layout.Header().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

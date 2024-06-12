@@ -1,14 +1,14 @@
 package todo
 
 import (
-	"github.com/Anttoam/SimpleTodo/views/base"
+	"github.com/Anttoam/SimpleTodo/views/layout"
 	"fmt"
 )
 
 templ EditUser(id string, name string, email string) {
 	<!DOCTYPE html>
 	<html lang="ja" class="h-full">
-		@base.Header()
+		@layout.Header()
 		<body id="edit-page" class="bg-gray-200">
 			@NavBar(id)
 			<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">

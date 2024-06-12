@@ -1,14 +1,14 @@
 package todo
 
 import (
-	"github.com/Anttoam/SimpleTodo/views/base"
+	"github.com/Anttoam/SimpleTodo/views/layout"
 	"github.com/Anttoam/SimpleTodo/dto"
 )
 
 templ Page(res dto.FindAllTodoResponse, id string) {
 	<!DOCTYPE html>
 	<html lang="ja" class="h-full" x-data="{ open: false }">
-		@base.Header()
+		@layout.Header()
 		<body id="page" class="bg-gray-200 p-4">
 			@NavBar(id)
 			<div class="px-8">
