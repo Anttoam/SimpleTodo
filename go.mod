@@ -4,7 +4,7 @@ go 1.22.2
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
-	github.com/a-h/templ v0.2.680
+	github.com/a-h/templ v0.2.707
 	github.com/alicebob/miniredis/v2 v2.32.1
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/gorilla/sessions v1.2.0
