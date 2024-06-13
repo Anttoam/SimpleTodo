@@ -8,7 +8,6 @@ import (
 
 templ Page(res dto.FindAllTodoResponse, id string) {
 	@layout.Base(true, id) {
-			@components.NavBar(id)
 			<div class="px-8">
 				@components.Create()
 				@components.List(res)
