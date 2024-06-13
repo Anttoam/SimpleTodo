@@ -654,10 +654,6 @@ video {
   height: auto;
 }
 
-.h-full {
-  height: 100%;
-}
-
 .h-screen {
   height: 100vh;
 }
@@ -783,10 +779,6 @@ video {
 
 .p-2 {
   padding: 0.5rem;
-}
-
-.p-4 {
-  padding: 1rem;
 }
 
 .p-8 {
