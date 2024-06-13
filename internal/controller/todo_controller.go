@@ -6,8 +6,9 @@ import (
 	"strconv"
 
 	"github.com/Anttoam/SimpleTodo/dto"
+	"github.com/Anttoam/SimpleTodo/views/components"
 	"github.com/Anttoam/SimpleTodo/views/error_page"
-	"github.com/Anttoam/SimpleTodo/views/todo"
+	"github.com/Anttoam/SimpleTodo/views/pages"
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	"github.com/rbcervilla/redisstore/v9"
@@ -89,7 +90,7 @@ func (t *TodoController) Create(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/todo/")
 	}
 
-	component := todo.Create()
+	component := components.Create()
 	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
@@ -124,7 +125,7 @@ func (t *TodoController) FindAll(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	component := todo.Page(*res, strconv.Itoa(userID))
+	component := pages.Page(*res, strconv.Itoa(userID))
 	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
@@ -174,7 +175,7 @@ func (t *TodoController) FindByID(c echo.Context) error {
 		return nil
 	}
 
-	component := todo.EditForm(strconv.Itoa(res.Todo.ID), res.Todo.Title, res.Todo.Description)
+	component := components.EditForm(strconv.Itoa(res.Todo.ID), res.Todo.Title, res.Todo.Description)
 	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
@@ -247,7 +248,7 @@ func (t *TodoController) Update(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	component := todo.List(*res)
+	component := components.List(*res)
 	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
@@ -300,7 +301,7 @@ func (t *TodoController) Delete(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	component := todo.Delete(strconv.Itoa(res.Todo.ID))
+	component := components.Delete(strconv.Itoa(res.Todo.ID))
 	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }

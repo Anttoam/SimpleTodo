@@ -9,8 +9,7 @@ import (
 
 	"github.com/Anttoam/SimpleTodo/dto"
 	"github.com/Anttoam/SimpleTodo/views/error_page"
-	"github.com/Anttoam/SimpleTodo/views/todo"
-	"github.com/Anttoam/SimpleTodo/views/user"
+	"github.com/Anttoam/SimpleTodo/views/pages"
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	"github.com/rbcervilla/redisstore/v9"
@@ -80,7 +79,7 @@ func (uc *UserController) SignUp(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/user/login")
 	}
 
-	component := user.SignUp()
+	component := pages.SignUp()
 	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
@@ -122,7 +121,7 @@ func (uc *UserController) Login(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/todo/")
 	}
 
-	component := user.Login()
+	component := pages.Login()
 	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
@@ -233,7 +232,7 @@ func (uc *UserController) EditUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	component := todo.EditUser(strconv.Itoa(userID), fetch.User.Name, fetch.User.Email)
+	component := pages.EditUser(strconv.Itoa(userID), fetch.User.Name, fetch.User.Email)
 	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
@@ -318,7 +317,7 @@ func (uc *UserController) EditPassword(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/user/%d", fetch.User.ID))
 	}
 
-	component := todo.EditPassword(strconv.Itoa(userID))
+	component := pages.EditPassword(strconv.Itoa(userID))
 	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }

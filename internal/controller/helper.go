@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Anttoam/SimpleTodo/views/todo"
+	"github.com/Anttoam/SimpleTodo/views/components"
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
@@ -43,7 +43,7 @@ func (t *TodoController) changeStatus(c echo.Context, changeFunc func(ctx contex
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	component := todo.List(*res)
+	component := components.List(*res)
 	handler := echo.WrapHandler(templ.Handler(component))
 	return handler(c)
 }
