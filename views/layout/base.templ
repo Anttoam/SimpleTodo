@@ -13,7 +13,7 @@ templ Base(isLoggedIn bool, userID string) {
         } else {
             @components.AuthNavBar()
         }
-        <body class="bg-gray-200">
+        <body id="page" class="bg-gray-200">
             { children... }
         </body>
     </html>
